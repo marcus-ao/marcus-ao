@@ -1,101 +1,166 @@
-import Image from "next/image";
+"use client"
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { useState, useEffect } from 'react';
+
+const profileData = {
+  name: "Marcus Ao",
+  title: "Undergraduate Student, Technophile",
+  bio: "Hi there, I'm Marcus, an undergraduate student majoring in Big Data Management & Application at Guangdong University of Technology. I'm passionate about learning and working at the intersection of Data Science and AI. Through this platform, I share insights, coding tips, and explore the latest trends in technology, reflecting my enthusiasm and thoughts.",
+  image: "/marcusao.jpg", 
+  caption: "Share the love, thoughts and joys through the life.",
+  socialLinks: [
+    { name: "Email", icon: "/mail.svg", email: "h8_you@marcusao.com" },
+    { name: "GitHub", icon: "/github.svg", url: "https://github.com/marcus-ao" },
+    { name: "Telegram", icon: "/telegram.svg", url: "https://t.me/tel_marcus_ao" }
+  ]
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const router = useRouter();
+  const [showEmailInfo, setShowEmailInfo] = useState(false);
+  const [emailAddress, setEmailAddress] = useState('');
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [clipboardAvailable, setClipboardAvailable] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      setClipboardAvailable(true);
+    }
+  }, []);
+
+  const handleSocialLinkClick = (link: any, e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    if (link.name === "Email") {
+      setEmailAddress(link.email);
+      setShowEmailInfo(true);
+      setCopySuccess(false);
+    } else {
+      window.open(link.url, '_blank');
+    }
+  };
+
+  const closeEmailInfo = () => {
+    setShowEmailInfo(false);
+  };
+
+  const copyToClipboard = () => {
+    if (clipboardAvailable) {
+      navigator.clipboard.writeText(emailAddress)
+        .then(() => {
+          setCopySuccess(true);
+          setTimeout(() => setCopySuccess(false), 2000);
+        })
+        .catch(err => {
+          console.error('无法复制到剪贴板: ', err);
+          fallbackCopyToClipboard();
+        });
+    } else {
+      fallbackCopyToClipboard();
+    }
+  };
+
+  const fallbackCopyToClipboard = () => {
+    try {
+      const textArea = document.createElement("textarea");
+      textArea.value = emailAddress;
+      
+      textArea.style.position = "fixed";
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.width = "2em";
+      textArea.style.height = "2em";
+      textArea.style.padding = "0";
+      textArea.style.border = "none";
+      textArea.style.outline = "none";
+      textArea.style.boxShadow = "none";
+      textArea.style.background = "transparent";
+      
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textArea);
+      
+      if (successful) {
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+      } else {
+        alert("复制失败，请手动复制");
+      }
+    } catch (err) {
+      console.error('回退复制方法也失败了:', err);
+      alert("无法复制，请手动选择并复制邮箱地址");
+    }
+  };
+
+  return (
+    <>
+      
+      <main>
+        <div className="content">
+          <h1>{profileData.name}</h1>
+          <h2>{profileData.title}</h2>
+          <p>{profileData.bio}</p>
+        </div>
+        <div className="image-container">
+          <img 
+            src={profileData.image} 
+            alt={profileData.name}
+            className="profile-image"
+          />
         </div>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      
+      <footer>
+        <div className="social-links">
+          <h3>Let's Connect :)</h3>
+          {profileData.socialLinks.map((link, index) => (
+            <a 
+              key={index}
+              href="#"
+              title={link.name}
+              onClick={(e) => handleSocialLinkClick(link, e)}
+            >
+              <img src={link.icon} alt={link.name} />
+            </a>
+          ))}
+        </div>
+        
+        <div className="caption-container">
+          <p className="caption">{profileData.caption}</p>
+        </div>
       </footer>
-    </div>
+
+      {showEmailInfo && (
+        <div className="email-info-overlay">
+          <div className="email-info-box">
+          <p style={{ fontWeight: 'bold' }}>我的邮箱地址</p>
+            <div className="email-address-container">
+              <p className="email-address">{emailAddress}</p>
+              <button 
+                className="copy-button" 
+                onClick={copyToClipboard} 
+                title="复制"
+              >
+                {copySuccess ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                )}
+              </button>
+            </div>
+            <button className="ok-button" onClick={closeEmailInfo}>好的</button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
