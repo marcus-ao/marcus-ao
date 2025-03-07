@@ -2,7 +2,7 @@ import './globals.css'
 import { ThemeProvider } from './context/theme-context'
 import type { Metadata } from 'next'
 import ThemeToggle from './context/theme-toggle'
-
+import { Analytics } from '@vercel/analytics/react'
 const profileData = {
   navItems: ["Home", "Blog"],
 };
@@ -54,6 +54,7 @@ export default function RootLayout({
             </nav>
           </header>
           {children}
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
