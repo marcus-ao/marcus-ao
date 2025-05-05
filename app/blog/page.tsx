@@ -124,7 +124,7 @@ export default function Blog() {
       <button 
         className={`scroll-to-top ${showScrollTop ? 'visible' : ''}`}
         onClick={scrollToTop}
-        aria-label="回到顶部"
+        aria-label="Back to the top"
       >
         <svg 
           xmlns="http://www.w3.org/2000/svg" 

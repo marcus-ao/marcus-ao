@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 import ThemeToggle from './context/theme-toggle'
 import { Analytics } from '@vercel/analytics/react'
 const profileData = {
-  navItems: ["Home", "Blog"],
+  navItems: ["Home", "Blog", "Share"],
 };
 
 export const metadata: Metadata = {
@@ -36,8 +36,20 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+                let theme = localStorage.getItem('theme');
+                if (!theme) {
+                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  theme = prefersDark ? 'dark' : 'light';
+                }
+                document.documentElement.setAttribute('data-theme', theme || 'light');
+            `,
+          }}
+        />
         <ThemeProvider>
           <header>
             <nav>

@@ -7,7 +7,7 @@ const profileData = {
   title: "Undergraduate Student, Technophile",
   bio: "Hi there, I'm Marcus, an undergraduate student majoring in Big Data Management & Application at Guangdong University of Technology. I'm passionate about learning and working at the intersection of Data Science and AI. Through this platform, I share insights, coding tips, and explore the latest trends in technology, reflecting my enthusiasm and thoughts.",
   image: "/marcusao.jpg", 
-  caption: "Share the love, thoughts and joys through the life.",
+  caption: "Spread the love, thoughts and joys through the life.",
   socialLinks: [
     { name: "Email", icon: "/mail.svg", email: "h8_you@marcusao.com" },
     { name: "GitHub", icon: "/github.svg", url: "https://github.com/marcus-ao" },
@@ -52,7 +52,7 @@ export default function Home() {
           setTimeout(() => setCopySuccess(false), 2000);
         })
         .catch(err => {
-          console.error('无法复制到剪贴板: ', err);
+          console.error('Unable to copy to the clipboard: ', err);
           fallbackCopyToClipboard();
         });
     } else {
@@ -87,11 +87,11 @@ export default function Home() {
         setCopySuccess(true);
         setTimeout(() => setCopySuccess(false), 2000);
       } else {
-        alert("复制失败，请手动复制");
+        alert("Copy failed, please copy manually.");
       }
     } catch (err) {
-      console.error('回退复制方法也失败了:', err);
-      alert("无法复制，请手动选择并复制邮箱地址");
+      console.error('The fallback copy method also failed: ', err);
+      alert("Copy failed, please select and copy the email address manually.");
     }
   };
 
@@ -136,13 +136,13 @@ export default function Home() {
       {showEmailInfo && (
         <div className="email-info-overlay">
           <div className="email-info-box">
-          <p style={{ fontWeight: 'bold' }}>我的邮箱地址</p>
+          <p style={{ fontWeight: 'bold' }}>My Email Address</p>
             <div className="email-address-container">
               <p className="email-address">{emailAddress}</p>
               <button 
                 className="copy-button" 
                 onClick={copyToClipboard} 
-                title="复制"
+                title="Copy"
               >
                 {copySuccess ? (
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -156,7 +156,7 @@ export default function Home() {
                 )}
               </button>
             </div>
-            <button className="ok-button" onClick={closeEmailInfo}>好的</button>
+            <button className="ok-button" onClick={closeEmailInfo}>Fine</button>
           </div>
         </div>
       )}
