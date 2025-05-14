@@ -67,7 +67,7 @@ const remarkObsidianImage: Plugin<[{ markdownFileDir?: string }], MdastRoot> = (
 
       while ((match = obsidianEmbedRegex.exec(node.value)) !== null) {
         const [fullMatch, rawFileName, altText] = match;
-        let imageName = String(rawFileName).trim(); 
+        const imageName = String(rawFileName).trim(); 
         const alt = String(altText || path.parse(imageName).name).trim();
 
         if (match.index > lastIndex) {
