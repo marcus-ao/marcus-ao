@@ -7,17 +7,17 @@ import { useTheme } from '../context/theme-context';
 const sharePosts = [
   {
     title: '测试1', 
-    image: '/pics/', 
+    image: '/pics/beach.jpg', 
     description: '测试中，敬请期待...', 
     date: '2025-05-05',
-    link: ''
+    link: '/share/250504/test'
   },
   {
-    title: '测试2',
-    image: '/pics/',
-    description: '测试中，敬请期待...',
-    date: '2025-05-03',
-    link: ''
+    title: '美国宣布独立',
+    image: '/share_notes/250504/Declaration of Independence.jpg',
+    description: '本文是对读完美国宣布独立前夕到独立宣言的发表这一历史过程中的梳理。',
+    date: '2025-05-04',
+    link: '/share/250504/america_independence'
   },
 
   {

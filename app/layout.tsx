@@ -1,4 +1,7 @@
 import './globals.css'
+import './markdown-styles.css'
+import 'katex/dist/katex.min.css'
+import 'highlight.js/styles/atom-one-dark.css'
 import { ThemeProvider } from './context/theme-context'
 import type { Metadata } from 'next'
 import ThemeToggle from './context/theme-toggle'
