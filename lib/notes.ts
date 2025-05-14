@@ -74,15 +74,15 @@ const remarkObsidianImage: Plugin<[{ markdownFileDir?: string }], MdastRoot> = (
           newNodes.push({ type: 'text', value: node.value.slice(lastIndex, match.index) });
         }
         
-        let imagePathInPublicDir: string; // 这是图片在 public/notes_assets/ 下的最终相对路径
+        let imagePathInPublicDir: string;
 
         if (imageName.startsWith('/') || imageName.startsWith('\\')) {
           // 情况1: Markdown 中的图片链接以 / 或 \ 开头 (例如 ![[/shared/image.jpg]])
           // 我们将其视为相对于 /notes_assets/ 的“绝对”路径。
-          // 例如，![[/foo/bar.jpg]] 会解析为 /notes_assets/foo/bar.jpg
+          // 例如，![[/foo/bar.jpg]] 会解析为 /share_notes/foo/bar.jpg
           imagePathInPublicDir = imageName.substring(1);
         } else if (imageName.includes('/') || imageName.includes('\\')) {
-          // 情况2: Markdown 中的图片链接包含路径分隔符 (例如 ![[subfolder/image.jpg]] 或 ![[assets/image.jpg]])
+          // 情况2: Markdown 中的图片链接包含路径分隔符 (例如 ![[subfolder/image.jpg]]
           // 这被视为相对于当前 Markdown 文件所在目录 (markdownFileDir) 的路径。
           // 例如，如果 markdownFileDir 是 "AMERICA"，链接是 ![[images/pic.jpg]]
           // imagePathInPublicDir 会是 "AMERICA/images/pic.jpg".
@@ -95,8 +95,7 @@ const remarkObsidianImage: Plugin<[{ markdownFileDir?: string }], MdastRoot> = (
           imagePathInPublicDir = path.join(markdownFileDir, imageName).replace(/\\/g, '/');
         }
         
-        // 最终的 URL 是 /notes_assets/ 加上上面计算出的 imagePathInPublicDir
-        // 这个 URL 对应于 public/notes_assets/ 目录下的文件。
+        // 最终的 URL 是 /share_notes/ 加上上面计算出的 imagePathInPublicDir
         // copy-assets.js 脚本负责将源文件复制到这个 public 目录下的相应位置。
         const imageUrl = `/share_notes/${imagePathInPublicDir}`;
 
