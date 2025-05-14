@@ -7,6 +7,10 @@ interface PageParams {
   slug: string[];
 }
 
+interface PageProps {
+  params: Promise<PageParams>;
+}
+
 export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
   const slugsData = getAllNoteSlugs();
   return slugsData.map(item => ({
@@ -14,9 +18,9 @@ export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
   }));
 }
 
-export async function generateMetadata({ params }: { params: PageParams }) {
-  const resolvedParams = await params;
-  const slugPath = resolvedParams.slug.join('/');
+export async function generateMetadata({ params: paramsPromise }: PageProps) {
+  const resolvedParams = await paramsPromise;
+  const slugPath = resolvedParams.slug.join('/'); 
   const noteData: NoteData | null = await getNoteData(slugPath);
 
   if (!noteData) {
@@ -31,9 +35,9 @@ export async function generateMetadata({ params }: { params: PageParams }) {
   };
 }
 
-export default async function NotePage({ params }: { params: PageParams }) {
-  const resolvedParams = await params;
-  const slugPath = resolvedParams.slug.join('/');
+export default async function NotePage({ params: paramsPromise }: PageProps) {
+  const resolvedParams = await paramsPromise;
+  const slugPath = resolvedParams.slug.join('/'); 
   const noteData: NoteData | null = await getNoteData(slugPath);
 
   if (!noteData) {
