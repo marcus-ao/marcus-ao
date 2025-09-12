@@ -9,7 +9,7 @@ const profileData = {
   image: "/marcusao.jpg", 
   caption: "Spread the love, thoughts and joys through the life.",
   socialLinks: [
-    { name: "Email", icon: "/mail.svg", email: "h8_you@marcusao.com" },
+    { name: "Email", icon: "/mail.svg", email: "mmarcusr.ao@gmail.com" },
     { name: "GitHub", icon: "/github.svg", url: "https://github.com/marcus-ao" },
     { name: "Telegram", icon: "/telegram.svg", url: "https://t.me/tel_marcus_ao" }
   ]
