@@ -1,6 +1,7 @@
 "use client"
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { themeColors } from '../../lib/site';
 
 type Theme = 'light' | 'dark';
 type ThemeContextType = {
@@ -10,31 +11,75 @@ type ThemeContextType = {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+function isTheme(value: string | null): value is Theme {
+  return value === 'light' || value === 'dark';
+}
+
+function applyTheme(theme: Theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.documentElement.style.colorScheme = theme;
+
+  let themeColorMeta = document.querySelector('meta[name="theme-color"]');
+  if (!themeColorMeta) {
+    themeColorMeta = document.createElement('meta');
+    themeColorMeta.setAttribute('name', 'theme-color');
+    document.head.appendChild(themeColorMeta);
+  }
+  themeColorMeta.setAttribute('content', themeColors[theme]);
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('light');
   
   useEffect(() => {
-    const storedTheme = localStorage.getItem('theme') as Theme;
-    if (storedTheme) {
+    const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const getSystemTheme = (): Theme => colorSchemeQuery.matches ? 'dark' : 'light';
+    let storedTheme: string | null = null;
+    try {
+      storedTheme = localStorage.getItem('theme');
+    } catch {}
+
+    if (isTheme(storedTheme)) {
       setTheme(storedTheme);
-      document.documentElement.setAttribute('data-theme', storedTheme);
+      applyTheme(storedTheme);
     } else {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const initialTheme = prefersDark ? 'dark' : 'light';
+      try {
+        localStorage.removeItem('theme');
+      } catch {}
+      const initialTheme = getSystemTheme();
       setTheme(initialTheme);
-      document.documentElement.setAttribute('data-theme', initialTheme);
+      applyTheme(initialTheme);
     }
+
+    const syncSystemTheme = (event: MediaQueryListEvent) => {
+      try {
+        if (isTheme(localStorage.getItem('theme'))) return;
+      } catch {}
+
+      const nextTheme = event.matches ? 'dark' : 'light';
+      setTheme(nextTheme);
+      applyTheme(nextTheme);
+    };
+
+    colorSchemeQuery.addEventListener('change', syncSystemTheme);
+    return () => colorSchemeQuery.removeEventListener('change', syncSystemTheme);
   }, []);
   
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-  };
+  const toggleTheme = useCallback(() => {
+    setTheme(currentTheme => {
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      applyTheme(newTheme);
+      try {
+        localStorage.setItem('theme', newTheme);
+      } catch {}
+      return newTheme;
+    });
+  }, []);
+
+  const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );

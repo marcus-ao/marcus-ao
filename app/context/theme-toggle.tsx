@@ -1,32 +1,49 @@
-"use client"
+"use client";
 
-import { useTheme } from '../context/theme-context';
 import { useState, useEffect } from 'react';
+import { useTheme } from './theme-context';
 
-export default function ThemeToggle() {
+type ThemeToggleProps = {
+  isChineseLocale?: boolean;
+};
+
+export default function ThemeToggle({ isChineseLocale = false }: ThemeToggleProps) {
   const { theme, toggleTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const isLightTheme = theme === 'light';
+  const labels = isChineseLocale
+    ? {
+      title: isLightTheme ? '深色模式' : '浅色模式',
+      aria: isLightTheme ? '切换到深色模式' : '切换到浅色模式',
+    }
+    : {
+      title: isLightTheme ? 'Dark mode' : 'Light mode',
+      aria: isLightTheme ? 'Switch to dark mode' : 'Switch to light mode',
+    };
   
   useEffect(() => {
     setMounted(true);
   }, []);
   
   if (!mounted) {
-    return <div className="theme-toggle-placeholder" style={{ width: "24px", height: "24px" }}></div>;
+    return <div className="theme-toggle-placeholder" aria-hidden="true" />;
   }
 
   return (
     <button 
+      type="button"
       onClick={toggleTheme}
       className="theme-toggle"
-      title={theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+      title={labels.title}
+      aria-label={labels.aria}
+      aria-pressed={theme === 'dark'}
     >
-      {theme === 'light' ? (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      {isLightTheme ? (
+        <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
         </svg>
       ) : (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="5"></circle>
           <line x1="12" y1="1" x2="12" y2="3"></line>
           <line x1="12" y1="21" x2="12" y2="23"></line>

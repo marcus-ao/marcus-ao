@@ -39,3 +39,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# docs
+docs/
+
+# generated content assets (rebuilt by npm scripts: copy-assets / build-search-index)
+# NOTE: public/fonts/ is intentionally committed — Vercel (Linux) cannot run
+# pyftsubset, so the subset .woff2 files are tracked as a build fallback.
+/public/content/
+/public/search-index.json
+
+# editor / tooling
+.claude/

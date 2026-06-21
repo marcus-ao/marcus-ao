@@ -1,7 +1,8 @@
 .markdown-body {
-  font-size: 1.1rem; /* 内容字号 */
+  font-size: var(--text-lg, 1.1rem); /* 内容字号 */
   line-height: 1.7; /* 行高设置 */
   color: var(--foreground);
+  overflow-wrap: break-word;
 }
 
 /* 标题 */
@@ -16,6 +17,8 @@
   margin-top: 1.5em;
   margin-bottom: 0.75em;
   line-height: 1.3;
+  scroll-margin-top: 7rem;
+  overflow-wrap: anywhere;
 }
 
 .markdown-body h1 {
@@ -38,21 +41,87 @@
   font-size: 1.125em;
 }
 
+.markdown-body h5 {
+  font-size: 1em;
+}
+
+.markdown-body h6 {
+  color: var(--muted-foreground);
+  font-size: 0.9em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 /* 段落 */
 .markdown-body p {
   margin-bottom: 1.25em;
+}
+
+.markdown-body strong {
+  color: var(--foreground);
+}
+
+.markdown-body mark {
+  background-color: var(--selection);
+  color: var(--foreground);
+  padding: 0.1em 0.25em;
+  border-radius: 4px;
+}
+
+.markdown-body del {
+  color: var(--muted-foreground);
+  text-decoration-thickness: 0.08em;
+}
+
+.markdown-body abbr[title],
+.markdown-body dfn[title] {
+  cursor: help;
+  text-decoration: underline dotted;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+
+.markdown-body cite,
+.markdown-body dfn {
+  color: var(--foreground);
+  font-style: italic;
+}
+
+.markdown-body time {
+  color: inherit;
+}
+
+.markdown-body sup,
+.markdown-body sub {
+  position: relative;
+  font-size: 0.72em;
+  line-height: 0;
+  vertical-align: baseline;
+}
+
+.markdown-body sup {
+  top: -0.5em;
+}
+
+.markdown-body sub {
+  bottom: -0.25em;
 }
 
 /* 链接 */
 .markdown-body a {
   color: var(--primary);
   text-decoration: none;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.2em;
   font-weight: 500;
+  overflow-wrap: anywhere;
+  transition: color 0.2s var(--ease-standard), text-decoration-color 0.2s var(--ease-standard);
 }
 
-.markdown-body a:hover {
+.markdown-body a:hover,
+.markdown-body a:focus-visible {
   text-decoration: underline;
-  filter: brightness(110%);
+  text-decoration-color: currentColor;
 }
 
 /* 列表 (无序和有序) */
@@ -60,6 +129,20 @@
 .markdown-body ol {
   margin-bottom: 1.25em;
   padding-left: 1.8em;
+}
+
+/* 恢复列表标记：Tailwind v4 Preflight 会把 ul/ol 重置为 list-style:none */
+.markdown-body ul {
+  list-style: disc outside;
+}
+.markdown-body ol {
+  list-style: decimal outside;
+}
+.markdown-body ul ul {
+  list-style-type: circle;
+}
+.markdown-body ul ul ul {
+  list-style-type: square;
 }
 
 .markdown-body ul li,
@@ -75,6 +158,42 @@
   font-weight: 500;
 }
 
+.markdown-body dl {
+  margin: 1.25em 0;
+}
+
+.markdown-body dt {
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+.markdown-body dd {
+  margin: 0.35em 0 0.9em 1.25em;
+  color: var(--muted-foreground);
+}
+
+.markdown-body .contains-task-list {
+  padding-left: 1.45em;
+}
+
+.markdown-body .task-list-item {
+  margin-left: 0;
+}
+
+.markdown-body input[type="checkbox"] {
+  width: 1em;
+  height: 1em;
+  margin: 0 0.5em 0.15em -1.4em;
+  accent-color: var(--primary);
+  cursor: default;
+  opacity: 1;
+  vertical-align: middle;
+}
+
+.markdown-body li:has(> input[type="checkbox"]) {
+  list-style: none;
+}
+
 /* 引用块 */
 .markdown-body blockquote {
   margin: 1.5em 0;
@@ -82,7 +201,7 @@
   border-left: 4px solid var(--primary);
   background-color: var(--secondary);
   color: var(--muted-foreground);
-  font-style: italic;
+  font-style: normal;
   border-radius: 4px;
 }
 
@@ -99,6 +218,10 @@
 }
 
 /* 图片 */
+.markdown-body figure {
+  margin: 1.7em auto;
+}
+
 .markdown-body img {
   max-width: 100%;
   height: auto;
@@ -108,69 +231,113 @@
   background-color: var(--accent);
 }
 
+.markdown-body figure img {
+  margin: 0 auto;
+}
+
+.markdown-body figcaption {
+  margin-top: 0.65em;
+  color: var(--muted-foreground);
+  font-size: 0.88em;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* GFM tables */
+.markdown-body .markdown-table-scroll {
+  width: 100%;
+  margin: 1.5em 0;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+}
+
+.markdown-body .markdown-table-scroll:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+.markdown-body table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-size: 0.95em;
+}
+
+.markdown-body th,
+.markdown-body td {
+  padding: 0.7em 0.85em;
+  border: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.markdown-body .markdown-table-scroll th:first-child,
+.markdown-body .markdown-table-scroll td:first-child {
+  border-left: 0;
+}
+
+.markdown-body .markdown-table-scroll th:last-child,
+.markdown-body .markdown-table-scroll td:last-child {
+  border-right: 0;
+}
+
+.markdown-body .markdown-table-scroll tr:first-child th,
+.markdown-body .markdown-table-scroll tr:first-child td {
+  border-top: 0;
+}
+
+.markdown-body .markdown-table-scroll tr:last-child td {
+  border-bottom: 0;
+}
+
+.markdown-body th {
+  background-color: var(--secondary);
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+.markdown-body tr:nth-child(even) td {
+  background-color: var(--surface);
+}
+
 /* 代码块基础样式 */
 .markdown-body pre {
   position: relative;
   margin: 1.5rem 0;
   padding: 0;
-  border-radius: 10px;
+  border-radius: 8px;
   overflow: hidden;
-  background-color: var(--pre-bg, #1e1e1e);
-  color: var(--pre-text, #e6e6e6);
-  border: 1px solid var(--pre-border, rgba(255, 255, 255, 0.1));
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  background-color: var(--pre-bg);
+  color: var(--pre-text);
+  border: 1px solid var(--pre-border);
+  box-shadow: var(--code-shadow);
   /* 添加窗口标题栏样式 */
   --window-controls-width: 70px;
 }
 
 /* 亮色模式变量 */
-@media (prefers-color-scheme: light) {
-  .markdown-body pre {
-    --pre-bg: #f8f9fa;
-    --pre-text: #24292e;
-    --pre-border: rgba(0, 0, 0, 0.1);
-    --copy-btn-bg: #e9ecef;
-    --copy-btn-text: #24292e;
-    --copy-btn-hover: #dee2e6;
-    --lang-badge-bg: #e9ecef;
-    --lang-badge-text: #24292e;
-    --expand-btn-bg: #e9ecef;
-    --expand-btn-text: #24292e;
-    --expand-btn-hover: #dee2e6;
-    --title-bar-bg: #e9ecef;
-    --window-dot-close: #ff5f56;
-    --window-dot-minimize: #ffbd2e;
-    --window-dot-maximize: #27c93f;
-    --window-dot-border: rgba(0, 0, 0, 0.1);
-    --inline-code-bg: rgba(175, 184, 193, 0.2);
-    --scrollbar-track: rgba(0, 0, 0, 0.05);
-    --scrollbar-thumb: rgba(0, 0, 0, 0.15);
-  }
-}
-
-/* 暗色模式变量 */
-@media (prefers-color-scheme: dark) {
-  .markdown-body pre {
-    --pre-bg: #282c34;
-    --pre-text: #abb2bf;
-    --pre-border: rgba(255, 255, 255, 0.1);
-    --copy-btn-bg: rgba(255, 255, 255, 0.05);
-    --copy-btn-text: #e6e6e6;
-    --copy-btn-hover: rgba(255, 255, 255, 0.1);
-    --lang-badge-bg: #3e4451;
-    --lang-badge-text: #e6e6e6;
-    --expand-btn-bg: #3e4451;
-    --expand-btn-text: #e6e6e6;
-    --expand-btn-hover: #4b5263;
-    --title-bar-bg: #21252b;
-    --window-dot-close: #ff5f56;
-    --window-dot-minimize: #ffbd2e;
-    --window-dot-maximize: #27c93f;
-    --window-dot-border: rgba(0, 0, 0, 0.3);
-    --inline-code-bg: rgba(110, 118, 129, 0.3);
-    --scrollbar-track: rgba(0, 0, 0, 0.3);
-    --scrollbar-thumb: rgba(255, 255, 255, 0.15);
-  }
+.markdown-body pre {
+  --pre-bg: var(--code-bg);
+  --pre-text: var(--code-text);
+  --pre-border: var(--code-border);
+  --copy-btn-bg: var(--code-control-bg);
+  --copy-btn-text: var(--code-text);
+  --copy-btn-hover: var(--code-control-hover);
+  --lang-badge-bg: var(--code-control-bg);
+  --lang-badge-text: var(--code-text);
+  --expand-btn-bg: var(--code-control-bg);
+  --expand-btn-text: var(--code-text);
+  --expand-btn-hover: var(--code-control-hover);
+  --title-bar-bg: var(--code-title-bar-bg);
+  --window-dot-close: var(--code-dot-close);
+  --window-dot-minimize: var(--code-dot-minimize);
+  --window-dot-maximize: var(--code-dot-maximize);
+  --window-dot-border: var(--code-border);
+  --scrollbar-track: var(--code-scrollbar-track);
+  --scrollbar-thumb: var(--code-scrollbar-thumb);
 }
 
 /* 窗口标题栏 */
@@ -240,31 +407,59 @@
   line-height: 1.6;
 }
 
+.markdown-body pre .code-container:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -4px;
+}
+
 /* 复制按钮样式 */
 .markdown-body pre .code-block-copy-button {
   position: absolute;
   top: 3.5px;
   right: 12px;
+  min-width: 4.5rem;
   padding: 0.25rem 0.6rem;
   font-size: 0.8rem;
   font-weight: 500;
+  line-height: 1.35;
   color: var(--copy-btn-text);
   background-color: var(--copy-btn-bg);
   border: 1px solid transparent;
   border-radius: 5px;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  text-align: center;
+  white-space: nowrap;
+  transition: background-color 0.2s var(--ease-standard), border-color 0.2s var(--ease-standard), box-shadow 0.2s var(--ease-standard), color 0.2s var(--ease-standard), opacity 0.2s var(--ease-standard), transform 0.2s var(--ease-standard);
   z-index: 11;
   opacity: 0.8;
 }
 
 .markdown-body pre .code-block-copy-button:hover {
   background-color: var(--primary);
-  color: white;
+  color: var(--on-primary);
   border-color: var(--primary);
   opacity: 1;
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: var(--code-control-shadow);
+}
+
+.markdown-body pre .code-block-copy-button:focus-visible {
+  opacity: 1;
+  border-color: var(--primary);
+}
+
+.markdown-body pre .code-block-copy-button.is-copied {
+  background-color: var(--code-success-bg);
+  color: var(--code-status-text);
+  border-color: transparent;
+  opacity: 1;
+}
+
+.markdown-body pre .code-block-copy-button.is-failed {
+  background-color: var(--code-danger-bg);
+  color: var(--code-status-text);
+  border-color: transparent;
+  opacity: 1;
 }
 
 /* 折叠状态 */
@@ -288,16 +483,21 @@
   border: 1px solid transparent; /* 添加透明边框 */
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease-in-out; /* 平滑过渡效果 */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08); /* 调整阴影 */
+  transition: background-color 0.2s var(--ease-standard), border-color 0.2s var(--ease-standard), box-shadow 0.2s var(--ease-standard), color 0.2s var(--ease-standard), transform 0.2s var(--ease-standard);
+  box-shadow: var(--code-control-shadow); /* 调整阴影 */
 }
 
 .markdown-body .code-block-expand-button:hover {
   background-color: var(--primary); /* 悬停时使用主题的主色作为背景 */
-  color: white; /* 悬停时文字颜色 */
+  color: var(--on-primary); /* 悬停时文字颜色 */
   border-color: var(--primary); /* 悬停时边框颜色 */
   transform: translateY(-2px); /* 更明显的上移效果 */
-  box-shadow: 0 4px 8px rgba(0,0,0,0.12); /* 调整阴影 */
+  box-shadow: var(--code-control-shadow-hover); /* 调整阴影 */
+}
+
+.markdown-body .code-block-expand-button:focus-visible {
+  border-color: var(--primary);
+  box-shadow: var(--code-control-shadow-hover);
 }
 
 /* 滚动条样式 */
@@ -326,18 +526,6 @@
   border-radius: 8px;
 }
 
-/* 垂直滚动条轨道 (当代码块未折叠时)，使用简单的轨道背景 */
-.markdown-body pre:not(.code-block-collapsed) .code-container::-webkit-scrollbar-track {
-  background: var(--scrollbar-track);
-  border-radius: 8px;
-}
-
-/* 水平滚动条轨道 (所有状态下)，使用简单的轨道背景 */
-.markdown-body pre .code-container::-webkit-scrollbar-track {
-  background: var(--scrollbar-track);
-  border-radius: 8px;
-}
-
 /* 滚动条滑块 (Thumb) */
 .markdown-body pre .code-container::-webkit-scrollbar-thumb {
   background: var(--scrollbar-thumb);
@@ -347,7 +535,7 @@
 }
 
 .markdown-body pre .code-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(128, 128, 128, 0.7);
+  background: var(--code-scrollbar-thumb-hover);
 }
 
 /* 行内代码 */
@@ -360,6 +548,19 @@
   font-family: "JetBrains Mono", "Fira Code", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
 }
 
+.markdown-body kbd {
+  display: inline-block;
+  padding: 0.15em 0.45em;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background-color: var(--secondary);
+  color: var(--foreground);
+  font-family: var(--font-code);
+  font-size: 0.85em;
+  line-height: 1.4;
+}
+
 /* 代码高亮增强 */
 .markdown-body pre code {
   font-family: inherit;
@@ -369,38 +570,107 @@
   display: block;
 }
 
-/* 语法高亮配色增强 - 确保与主题匹配 */
-.markdown-body pre code .keyword,
-.markdown-body pre code .selector-tag,
-.markdown-body pre code .title,
-.markdown-body pre code .section,
-.markdown-body pre code .doctag,
-.markdown-body pre code .name,
-.markdown-body pre code .strong {
-  font-weight: normal;
-}
-
-/* 确保整个代码区域显示正常 */
-.markdown-body pre code .hljs {
+.markdown-body pre code.hljs {
   display: block;
   overflow-x: auto;
   color: inherit;
   background: transparent;
 }
 
+.markdown-body pre code .hljs-comment,
+.markdown-body pre code .hljs-quote {
+  color: var(--syntax-comment);
+  font-style: italic;
+}
+
+.markdown-body pre code .hljs-keyword,
+.markdown-body pre code .hljs-selector-tag,
+.markdown-body pre code .hljs-doctag,
+.markdown-body pre code .hljs-literal,
+.markdown-body pre code .hljs-section,
+.markdown-body pre code .hljs-link {
+  color: var(--syntax-keyword);
+}
+
+.markdown-body pre code .hljs-string,
+.markdown-body pre code .hljs-regexp,
+.markdown-body pre code .hljs-template-variable,
+.markdown-body pre code .hljs-symbol,
+.markdown-body pre code .hljs-bullet {
+  color: var(--syntax-string);
+}
+
+.markdown-body pre code .hljs-number,
+.markdown-body pre code .hljs-built_in,
+.markdown-body pre code .hljs-builtin-name,
+.markdown-body pre code .hljs-formula,
+.markdown-body pre code .hljs-params {
+  color: var(--syntax-number);
+}
+
+.markdown-body pre code .hljs-operator {
+  color: var(--syntax-operator);
+}
+
+.markdown-body pre code .hljs-title,
+.markdown-body pre code .hljs-title.function_,
+.markdown-body pre code .hljs-function,
+.markdown-body pre code .hljs-type,
+.markdown-body pre code .hljs-class,
+.markdown-body pre code .hljs-tag,
+.markdown-body pre code .hljs-name,
+.markdown-body pre code .hljs-selector-id,
+.markdown-body pre code .hljs-selector-class,
+.markdown-body pre code .hljs-selector-attr,
+.markdown-body pre code .hljs-selector-pseudo,
+.markdown-body pre code .hljs-attribute {
+  color: var(--syntax-function);
+}
+
+.markdown-body pre code .hljs-variable,
+.markdown-body pre code .hljs-template-tag,
+.markdown-body pre code .hljs-meta,
+.markdown-body pre code .hljs-meta .hljs-keyword,
+.markdown-body pre code .hljs-meta .hljs-string,
+.markdown-body pre code .hljs-property,
+.markdown-body pre code .hljs-attr {
+  color: var(--syntax-variable);
+}
+
+.markdown-body pre code .hljs-subst {
+  color: inherit;
+}
+
+.markdown-body pre code .hljs-deletion {
+  color: var(--syntax-deleted);
+}
+
+.markdown-body pre code .hljs-addition {
+  color: var(--syntax-inserted);
+}
+
+.markdown-body pre code .hljs-emphasis {
+  font-style: italic;
+}
+
+.markdown-body pre code .hljs-strong {
+  font-weight: 700;
+}
+
 /* Callouts (提示块) */
 .markdown-body .callout {
+  --callout-accent: var(--primary);
+  --callout-background: var(--secondary);
+  --callout-title-color: var(--primary);
   padding: 1em 1.5em;
   margin: 1.5em 0;
   border-left-width: 4px;
   border-left-style: solid;
+  border-left-color: var(--callout-accent);
   border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+  background-color: var(--callout-background);
+  box-shadow: var(--callout-shadow);
 }
-[data-theme='dark'] .markdown-body .callout {
-   box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-}
-
 
 .markdown-body .callout-title {
   font-weight: bold;
@@ -408,6 +678,7 @@
   display: flex;
   align-items: center;
   gap: 0.5em;
+  color: var(--callout-title-color);
 }
 
 .markdown-body .callout-type-name {
@@ -418,66 +689,186 @@
   margin-bottom: 0;
 }
 
-/* 特定 Callout 类型 */
-.markdown-body .callout-note {
-  border-left-color: var(--primary); 
-  background-color: var(--secondary);
+.markdown-body details:not(.callout) {
+  margin: 1.4em 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  overflow: hidden;
 }
-.markdown-body .callout-note .callout-title {
+
+.markdown-body details:not(.callout)[open] {
+  background: color-mix(in srgb, var(--primary) 4%, var(--surface));
+}
+
+.markdown-body details:not(.callout) summary {
+  cursor: pointer;
+  padding: 0.8em 1em;
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+.markdown-body details:not(.callout) summary::marker {
   color: var(--primary);
 }
 
-.markdown-body .callout-warning { 
-  border-left-color: #f59e0b; 
-  background-color: #fffbeb; 
-}
-.markdown-body .callout-warning .callout-title {
-  color: #b45309; 
-}
-[data-theme='dark'] .markdown-body .callout-warning {
-  border-left-color: #f59e0b;
-  background-color: #4a2c0d;
-}
-[data-theme='dark'] .markdown-body .callout-warning .callout-title {
-  color: #fde68a; 
+.markdown-body details:not(.callout) summary::-webkit-details-marker {
+  color: var(--primary);
 }
 
-
-.markdown-body .callout-tip { 
-  border-left-color: #10b981;
-  background-color: #f0fdf4;
-}
-.markdown-body .callout-tip .callout-title {
-  color: #047857;
-}
-[data-theme='dark'] .markdown-body .callout-tip {
-  border-left-color: #10b981;
-  background-color: #064e3b;
-}
-[data-theme='dark'] .markdown-body .callout-tip .callout-title {
-  color: #a7f3d0;
+.markdown-body details:not(.callout) summary:hover,
+.markdown-body details:not(.callout) summary:focus-visible {
+  color: var(--primary);
 }
 
-.markdown-body .callout-important {
-  border-left-color: #ef4444;
-  background-color: #fef2f2;
+.markdown-body details:not(.callout)[open] summary {
+  border-bottom: 1px solid var(--border);
 }
-.markdown-body .callout-important .callout-title {
-  color: #b91c1c;
+
+.markdown-body details:not(.callout) > :not(summary) {
+  margin-left: 1em;
+  margin-right: 1em;
 }
-[data-theme='dark'] .markdown-body .callout-important {
-  border-left-color: #ef4444;
-  background-color: #7f1d1d;
+
+.markdown-body details:not(.callout) > :last-child {
+  margin-bottom: 1em;
 }
-[data-theme='dark'] .markdown-body .callout-important .callout-title {
-  color: #fecaca;
+
+.markdown-body details.callout {
+  padding: 0;
+}
+
+.markdown-body details.callout .callout-title {
+  margin-bottom: 0;
+  padding: 1em 1.5em;
+  cursor: pointer;
+  list-style: none;
+}
+
+.markdown-body details.callout .callout-title::-webkit-details-marker {
+  display: none;
+}
+
+.markdown-body details.callout .callout-title::marker {
+  content: "";
+}
+
+.markdown-body details.callout .callout-title::after {
+  content: "";
+  width: 0.45em;
+  height: 0.45em;
+  margin-left: auto;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translateY(-0.12em);
+  transition: transform 0.2s var(--ease-standard);
+}
+
+.markdown-body details.callout[open] .callout-title::after {
+  transform: rotate(225deg) translate(-0.05em, -0.05em);
+}
+
+.markdown-body details.callout .callout-content {
+  padding: 0 1.5em 1em;
+}
+
+.markdown-body .callout-note,
+.markdown-body .callout-info,
+.markdown-body .callout-todo {
+  --callout-accent: var(--primary);
+  --callout-background: var(--secondary);
+  --callout-title-color: var(--primary);
+}
+
+.markdown-body .callout-warning,
+.markdown-body .callout-caution,
+.markdown-body .callout-attention,
+.markdown-body .callout-question,
+.markdown-body .callout-help,
+.markdown-body .callout-faq {
+  --callout-accent: var(--callout-warning-border);
+  --callout-background: var(--callout-warning-bg);
+  --callout-title-color: var(--callout-warning-title);
+}
+
+.markdown-body .callout-tip,
+.markdown-body .callout-success,
+.markdown-body .callout-check,
+.markdown-body .callout-done {
+  --callout-accent: var(--callout-tip-border);
+  --callout-background: var(--callout-tip-bg);
+  --callout-title-color: var(--callout-tip-title);
+}
+
+.markdown-body .callout-important,
+.markdown-body .callout-danger,
+.markdown-body .callout-error,
+.markdown-body .callout-fail,
+.markdown-body .callout-failure,
+.markdown-body .callout-missing,
+.markdown-body .callout-bug {
+  --callout-accent: var(--callout-important-border);
+  --callout-background: var(--callout-important-bg);
+  --callout-title-color: var(--callout-important-title);
+}
+
+.markdown-body .callout-example {
+  --callout-accent: var(--primary);
+  --callout-background: color-mix(in srgb, var(--primary) 9%, var(--background));
+  --callout-title-color: var(--primary);
+}
+
+.markdown-body .callout-quote,
+.markdown-body .callout-cite {
+  --callout-accent: var(--muted-foreground);
+  --callout-background: var(--surface);
+  --callout-title-color: var(--muted-foreground);
 }
 
 /* KaTeX 数学公式显示模式 - 居中并添加一些边距 */
 .markdown-body .katex-display {
   margin: 1em 0;
+  padding-bottom: 0.15em;
   overflow-x: auto; 
   overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+.markdown-body .footnotes,
+.markdown-body [data-footnotes] {
+  margin-top: 2.5em;
+  padding-top: 1em;
+  border-top: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-size: 0.92em;
+}
+
+.markdown-body .footnotes ol,
+.markdown-body [data-footnotes] ol {
+  padding-left: 1.45em;
+}
+
+.markdown-body .footnotes li,
+.markdown-body [data-footnotes] li {
+  margin-bottom: 0.45em;
+}
+
+.markdown-body .footnotes li:target,
+.markdown-body [data-footnotes] li:target {
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--primary) 9%, transparent);
+}
+
+.markdown-body [data-footnote-ref] {
+  margin-left: 0.08em;
+  font-size: 0.75em;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.markdown-body [data-footnote-backref] {
+  color: var(--primary);
+  text-decoration: none;
 }
 
 /* 标题锚点链接 */
@@ -486,7 +877,7 @@
   margin-left: 0.5em;
   color: var(--primary);
   text-decoration: none;
-  transition: opacity 0.2s ease-in-out;
+  transition: opacity 0.2s var(--ease-standard);
 }
 
 /* 鼠标悬停在标题上时显示锚点链接 */
@@ -499,9 +890,20 @@
   opacity: 1;
 }
 
+.markdown-body h1:focus-within .anchor-heading-link,
+.markdown-body h2:focus-within .anchor-heading-link,
+.markdown-body h3:focus-within .anchor-heading-link,
+.markdown-body h4:focus-within .anchor-heading-link,
+.markdown-body h5:focus-within .anchor-heading-link,
+.markdown-body h6:focus-within .anchor-heading-link,
+.markdown-body .anchor-heading-link:focus-visible {
+  opacity: 1;
+}
+
 .markdown-body-tag {
   display: inline-block;
   background-color: var(--accent);
+  border: 1px solid transparent;
   color: var(--foreground);
   padding: 0.25em 0.75em; 
   border-radius: 9999px; 
@@ -511,15 +913,45 @@
   margin-bottom: 0.5rem;
   line-height: 1.4;
   text-decoration: none;
+  transition: background-color 0.2s var(--ease-standard), border-color 0.2s var(--ease-standard), color 0.2s var(--ease-standard);
+}
+
+.markdown-body-tag:where(a) {
+  text-decoration: none;
 }
 
 /* 鼠标悬停在标签上时的效果 */
-.markdown-body-tag:hover {
-  filter: brightness(110%);
+.markdown-body-tag:hover,
+.markdown-body-tag:focus-visible {
+  background-color: color-mix(in srgb, var(--primary) 12%, var(--accent));
+  border-color: color-mix(in srgb, var(--primary) 35%, transparent);
+  color: var(--primary);
 }
 
 /* 针对暗色模式下标签的微调 */
 [data-theme='dark'] .markdown-body-tag {
   background-color: var(--accent);
   color: var(--foreground);
+}
+
+@media (max-width: 480px) {
+  .markdown-body pre .code-block-language {
+    left: 56px;
+    right: 74px;
+    overflow: hidden;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .markdown-body pre .code-container {
+    padding: 40px 14px 16px;
+    font-size: 0.85rem;
+  }
+
+  .markdown-body pre .code-block-copy-button {
+    right: 8px;
+    min-width: 4rem;
+    padding: 0.25rem 0.45rem;
+  }
 }

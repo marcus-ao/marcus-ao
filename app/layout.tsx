@@ -1,18 +1,51 @@
 import './globals.css'
 import './markdown-styles.css'
 import 'katex/dist/katex.min.css'
-import 'highlight.js/styles/atom-one-dark.css'
 import { ThemeProvider } from './context/theme-context'
-import type { Metadata } from 'next'
-import ThemeToggle from './context/theme-toggle'
+import type { Metadata, Viewport } from 'next'
+import { Fraunces, Public_Sans } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react'
-const profileData = {
-  navItems: ["Home", "Blog", "Share"],
-};
+import SiteNavigation from './components/SiteNavigation'
+import SkipLink from './components/SkipLink'
+import { siteDescription, siteName, siteTitle, siteUrl, themeColors } from '../lib/site'
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-heading-latin',
+  display: 'swap',
+})
+
+const publicSans = Public_Sans({
+  subsets: ['latin'],
+  variable: '--font-body-latin',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
-  title: "Diamonds and Pearls",
-  description: "Personal website of Marcus Ao",
+  metadataBase: new URL(siteUrl),
+  applicationName: siteName,
+  title: siteTitle,
+  description: siteDescription,
+  alternates: {
+    canonical: '/',
+  },
+  authors: [{ name: siteName, url: siteUrl }],
+  creator: siteName,
+  publisher: siteName,
+  openGraph: {
+    title: siteTitle,
+    description: siteDescription,
+    url: '/',
+    siteName,
+    images: ['/opengraph-image'],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: siteTitle,
+    description: siteDescription,
+    images: ['/opengraph-image'],
+  },
   icons: {
     icon: [
       { url: '/favicon.ico' },
@@ -33,40 +66,53 @@ export const metadata: Metadata = {
   }
 }
 
+export const viewport: Viewport = {
+  themeColor: themeColors.light,
+}
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={`${fraunces.variable} ${publicSans.variable}`} suppressHydrationWarning>
       <body>
         <script
           dangerouslySetInnerHTML={{
             __html: `
-                let theme = localStorage.getItem('theme');
+              (() => {
+                const isTheme = (value) => value === 'light' || value === 'dark';
+                let theme = null;
+                try {
+                  const storedTheme = localStorage.getItem('theme');
+                  if (isTheme(storedTheme)) {
+                    theme = storedTheme;
+                  } else if (storedTheme) {
+                    localStorage.removeItem('theme');
+                  }
+                } catch {}
                 if (!theme) {
                   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                   theme = prefersDark ? 'dark' : 'light';
                 }
-                document.documentElement.setAttribute('data-theme', theme || 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+                document.documentElement.style.colorScheme = theme;
+                let themeColorMeta = document.querySelector('meta[name="theme-color"]');
+                if (!themeColorMeta) {
+                  themeColorMeta = document.createElement('meta');
+                  themeColorMeta.setAttribute('name', 'theme-color');
+                  document.head.appendChild(themeColorMeta);
+                }
+                themeColorMeta.setAttribute('content', theme === 'dark' ? '${themeColors.dark}' : '${themeColors.light}');
+              })();
             `,
           }}
         />
         <ThemeProvider>
-          <header>
-            <nav>
-              {profileData.navItems.map((item, index) => (
-                <a 
-                  key={index} 
-                  href={item === "Home" ? "/" : `/${item.toLowerCase()}`}
-                  className="nav-link"
-                >
-                  {item}
-                </a>
-              ))}
-              <ThemeToggle />
-            </nav>
+          <SkipLink />
+          <header className="site-header">
+            <SiteNavigation />
           </header>
           {children}
           <Analytics />
