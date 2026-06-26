@@ -11,8 +11,9 @@ export default function SiteNavigation() {
 
   return (
     <nav className="site-nav" aria-label={ariaLabel}>
-      <NavLinks isChineseLocale={isChineseLocale} />
-      <SearchModal isChineseLocale={isChineseLocale} />
+      {/* Site chrome (nav + search) stays in English regardless of article locale to avoid mixed-language UI. */}
+      <NavLinks />
+      <SearchModal />
       <ThemeToggle isChineseLocale={isChineseLocale} />
     </nav>
   );

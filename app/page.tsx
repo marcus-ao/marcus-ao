@@ -33,7 +33,7 @@ export default function Home() {
       <main id="main-content" className="flex w-full flex-1 items-center box-border px-6 py-8 max-[768px]:px-5 max-[768px]:py-6 max-[480px]:px-4" lang="en-US">
         <div className="mx-auto flex w-full max-w-3xl items-center gap-12 max-[900px]:gap-10 max-[768px]:flex-col-reverse max-[768px]:gap-7 max-[768px]:text-center">
           <div className="content min-w-0 flex-1 animate-[fade-up_0.55s_var(--ease-standard)_both] motion-reduce:animate-none">
-            <h1 className="font-serif text-[2.75rem] font-semibold leading-[1.08] text-foreground max-[768px]:text-[2.25rem] max-[480px]:text-[2rem]">
+            <h1 className="font-serif text-[clamp(2rem,1.2rem_+_3vw,2.75rem)] font-semibold leading-[1.08] tracking-[-0.02em] text-foreground">
               {profileData.name}
             </h1>
             <p className="mt-3 font-sans text-[0.78rem] font-semibold uppercase text-muted-foreground">

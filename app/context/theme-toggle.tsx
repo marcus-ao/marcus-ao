@@ -30,9 +30,17 @@ export default function ThemeToggle({ isChineseLocale = false }: ThemeToggleProp
   }
 
   return (
-    <button 
+    <button
       type="button"
-      onClick={toggleTheme}
+      onClick={(event) => {
+        // Keyboard activation reports detail 0 and no pointer coords; reveal from the button center instead.
+        if (event.detail === 0) {
+          const rect = event.currentTarget.getBoundingClientRect();
+          toggleTheme({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
+        } else {
+          toggleTheme({ x: event.clientX, y: event.clientY });
+        }
+      }}
       className="theme-toggle"
       title={labels.title}
       aria-label={labels.aria}

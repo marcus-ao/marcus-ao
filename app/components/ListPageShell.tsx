@@ -24,7 +24,7 @@ export default function ListPageShell({
         lang={locale}
       >
         <div className="mb-[30px] w-full text-left">
-          <h1 className="mb-2.5 font-serif text-[2.5rem] text-foreground max-[768px]:text-[2rem] max-[480px]:text-[1.8rem]">
+          <h1 className="mb-2.5 font-serif text-[clamp(2rem,1.3rem_+_2.6vw,2.5rem)] tracking-[-0.02em] text-foreground">
             {title}
           </h1>
         </div>

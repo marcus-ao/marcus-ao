@@ -4,9 +4,13 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { themeColors } from '../../lib/site';
 
 type Theme = 'light' | 'dark';
+type ToggleOrigin = { x: number; y: number };
 type ThemeContextType = {
   theme: Theme;
-  toggleTheme: () => void;
+  toggleTheme: (origin?: ToggleOrigin) => void;
+};
+type DocumentWithViewTransition = Document & {
+  startViewTransition?: (callback: () => void) => unknown;
 };
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -65,15 +69,40 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return () => colorSchemeQuery.removeEventListener('change', syncSystemTheme);
   }, []);
   
-  const toggleTheme = useCallback(() => {
-    setTheme(currentTheme => {
-      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+  const toggleTheme = useCallback((origin?: ToggleOrigin) => {
+    // Read the live attribute so the toggle is correct even before React state settles.
+    const currentTheme: Theme =
+      document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    const newTheme: Theme = currentTheme === 'light' ? 'dark' : 'light';
+
+    const applyNext = () => {
       applyTheme(newTheme);
+      setTheme(newTheme);
       try {
         localStorage.setItem('theme', newTheme);
       } catch {}
-      return newTheme;
-    });
+    };
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const startViewTransition = (document as DocumentWithViewTransition).startViewTransition;
+
+    if (typeof startViewTransition !== 'function' || prefersReducedMotion) {
+      applyNext();
+      return;
+    }
+
+    const root = document.documentElement;
+    const x = origin?.x ?? window.innerWidth;
+    const y = origin?.y ?? 0;
+    const endRadius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y),
+    );
+    root.style.setProperty('--vt-x', `${x}px`);
+    root.style.setProperty('--vt-y', `${y}px`);
+    root.style.setProperty('--vt-r', `${endRadius}px`);
+
+    startViewTransition.call(document, applyNext);
   }, []);
 
   const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
