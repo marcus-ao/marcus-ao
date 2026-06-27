@@ -18,8 +18,9 @@ export default function EmailButton({ email, icon, name }: EmailButtonProps) {
   const [clipboardAvailable, setClipboardAvailable] = useState(false);
   const dialogId = useId();
   const dialogTitleId = useId();
+  const dialogDescId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
-  const okButtonRef = useRef<HTMLButtonElement>(null);
+  const copyButtonRef = useRef<HTMLButtonElement>(null);
   const copyFeedbackTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const focusFrameRef = useRef<number | null>(null);
   const labels = isChineseLocale
@@ -31,7 +32,9 @@ export default function EmailButton({ email, icon, name }: EmailButtonProps) {
       copyFailedFeedback: '复制失败。请手动选中邮箱地址复制。',
       copiedFeedback: '已复制到剪贴板。',
       close: '关闭',
+      copyEmail: '复制邮箱',
       title: '我的邮箱地址',
+      subtitle: '随时欢迎来信交流。',
       tryAgain: '重试复制',
     }
     : {
@@ -42,7 +45,9 @@ export default function EmailButton({ email, icon, name }: EmailButtonProps) {
       copyFailedFeedback: 'Copy failed. Select the address and copy it manually.',
       copiedFeedback: 'Copied to clipboard.',
       close: 'Close',
+      copyEmail: 'Copy email',
       title: 'My Email Address',
+      subtitle: 'Feel free to reach out anytime.',
       tryAgain: 'Try copying again',
     };
 
@@ -65,7 +70,7 @@ export default function EmailButton({ email, icon, name }: EmailButtonProps) {
 
     document.body.style.overflow = 'hidden';
     focusFrameRef.current = window.requestAnimationFrame(() => {
-      okButtonRef.current?.focus();
+      copyButtonRef.current?.focus();
       focusFrameRef.current = null;
     });
 
@@ -231,34 +236,65 @@ export default function EmailButton({ email, icon, name }: EmailButtonProps) {
             role="dialog"
             aria-modal="true"
             aria-labelledby={dialogTitleId}
+            aria-describedby={dialogDescId}
             onPointerDown={(event) => event.stopPropagation()}
           >
-            <p id={dialogTitleId} className="email-info-title">{labels.title}</p>
-            <div className="email-address-container">
-              <p className="email-address">{email}</p>
+            <div className="email-info-header">
+              <span className="email-info-icon" aria-hidden="true">
+                <svg focusable="false" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                </svg>
+              </span>
+              <div>
+                <p id={dialogTitleId} className="email-info-title">{labels.title}</p>
+                <p id={dialogDescId} className="email-info-subtitle">{labels.subtitle}</p>
+              </div>
+            </div>
+
+            <div className="email-address-field">
+              <span className="email-address-text">{email}</span>
               <button
                 type="button"
-                className="copy-button"
+                className={`email-address-copy${copySuccess ? ' is-copied' : ''}${copyError ? ' is-failed' : ''}`}
                 onClick={copyToClipboard}
                 title={copySuccess ? labels.copied : copyError ? labels.copyFailed : labels.copy}
                 aria-label={copySuccess ? labels.copied : copyError ? labels.tryAgain : labels.copyAddress}
               >
                 {copySuccess ? (
-                  <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12"></polyline>
                   </svg>
+                ) : copyError ? (
+                  <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                  </svg>
                 ) : (
-                  <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                   </svg>
                 )}
               </button>
             </div>
-            <p className="email-copy-status" aria-live="polite" aria-atomic="true">
+
+            <div className="email-actions">
+              <button
+                type="button"
+                ref={copyButtonRef}
+                className={`email-copy-button${copySuccess ? ' is-copied' : ''}${copyError ? ' is-failed' : ''}`}
+                onClick={copyToClipboard}
+              >
+                {copySuccess ? labels.copied : copyError ? labels.copyFailed : labels.copyEmail}
+              </button>
+              <button type="button" className="email-close-button" onClick={closeEmailInfo}>{labels.close}</button>
+            </div>
+
+            <p className="sr-only" aria-live="polite" aria-atomic="true">
               {copySuccess ? labels.copiedFeedback : copyError ? labels.copyFailedFeedback : ''}
             </p>
-            <button type="button" ref={okButtonRef} className="ok-button" onClick={closeEmailInfo}>{labels.close}</button>
           </div>
         </div>
       )}
