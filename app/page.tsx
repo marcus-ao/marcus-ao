@@ -21,7 +21,7 @@ const profileData = {
   image: "/marcusao.webp",
   caption: "Sharing love, thoughts, and joys through life.",
   socialLinks: [
-    { name: "Email", icon: "/mail.svg", email: "mmarcusr.ao@gmail.com" },
+    { name: "Email", icon: "/mail.svg", email: "soulboymarcus@gmail.com" },
     { name: "GitHub", icon: "/github.svg", url: "https://github.com/marcus-ao" },
     { name: "Telegram", icon: "/telegram.svg", url: "https://t.me/marcus_ao" }
   ] satisfies SocialLink[]

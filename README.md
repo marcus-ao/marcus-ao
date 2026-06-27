@@ -6,7 +6,7 @@
 
 [![Website](https://img.shields.io/badge/Website-marcusao.stream-6D4AFF?style=flat-square&logo=vercel&logoColor=white)](https://www.marcusao.stream)
 [![Blog](https://img.shields.io/badge/Blog-Read%20my%20notes-1A1A1A?style=flat-square&logo=readme&logoColor=white)](https://www.marcusao.stream/blog)
-[![Email](https://img.shields.io/badge/Email-EA4335?style=flat-square&logo=gmail&logoColor=white)](mailto:mmarcusr.ao@gmail.com)
+[![Email](https://img.shields.io/badge/Email-EA4335?style=flat-square&logo=gmail&logoColor=white)](mailto:soulboymarcus@gmail.com)
 
 </div>
 
@@ -62,8 +62,8 @@ A few pieces to start with:
 ### Connect
 
 [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/marcus-ao)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/tel_marcus_ao)
-[![Email](https://img.shields.io/badge/Email-EA4335?style=flat-square&logo=gmail&logoColor=white)](mailto:mmarcusr.ao@gmail.com)
+[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/marcus_ao)
+[![Email](https://img.shields.io/badge/Email-EA4335?style=flat-square&logo=gmail&logoColor=white)](mailto:soulboymarcus@gmail.com)
 
 ---
 
