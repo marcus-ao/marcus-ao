@@ -16,14 +16,14 @@ type SocialLink =
 
 const profileData = {
   name: "Marcus Ao",
-  title: "Undergraduate Student · Technophile",
-  bio: "Hi there, I'm Marcus, an undergraduate student majoring in Big Data Management & Application at Guangdong University of Technology. I'm passionate about learning and working at the intersection of Data Science and AI. Through this platform, I share insights, coding tips, and explore the latest trends in technology, reflecting my enthusiasm and thoughts.",
+  title: "Data Scientist · Technophile · Vibe Coder",
+  bio: "Hi there, I'm Marcus — a data scientist working at the intersection of data, machine learning, and AI. These days I spend my hours turning messy, real-world data into clear and useful insight, and my spare time learning, building, and writing. This little corner of the web is where I share technical notes, reading reflections, and joys of a curious life.",
   image: "/marcusao.webp",
-  caption: "Sharing love, thoughts, and small joys through life.",
+  caption: "Sharing love, thoughts, and joys through life.",
   socialLinks: [
     { name: "Email", icon: "/mail.svg", email: "mmarcusr.ao@gmail.com" },
     { name: "GitHub", icon: "/github.svg", url: "https://github.com/marcus-ao" },
-    { name: "Telegram", icon: "/telegram.svg", url: "https://t.me/tel_marcus_ao" }
+    { name: "Telegram", icon: "/telegram.svg", url: "https://t.me/marcus_ao" }
   ] satisfies SocialLink[]
 };
 
