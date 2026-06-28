@@ -13,6 +13,21 @@ type TableOfContentsProps = {
 const ACTIVE_LINE_OFFSET = 110;
 const SMOOTH_SCROLL_SETTLE_MS = 900;
 
+function getScrollMarginTop(element: HTMLElement) {
+  const value = Number.parseFloat(window.getComputedStyle(element).scrollMarginTop);
+
+  return Number.isFinite(value) ? value : 0;
+}
+
+function scrollToHeading(element: HTMLElement, behavior: ScrollBehavior) {
+  const top = element.getBoundingClientRect().top + window.scrollY - getScrollMarginTop(element);
+
+  window.scrollTo({
+    top: Math.max(0, top),
+    behavior,
+  });
+}
+
 function getDecodedHashId() {
   const hash = window.location.hash.slice(1);
   if (!hash) return '';
@@ -67,6 +82,7 @@ export default function TableOfContents({
   const mobileTocRef = useRef<HTMLDetailsElement>(null);
   const lockUntilRef = useRef(0);
   const settleTimerRef = useRef<number | null>(null);
+  const scrollFrameRef = useRef<number | null>(null);
   const syncFrameRef = useRef<number | null>(null);
 
   const commitActiveId = useCallback((id: string) => {
@@ -133,6 +149,20 @@ export default function TableOfContents({
     });
   }, [updateActiveId]);
 
+  const scheduleHeadingScroll = useCallback((id: string, behavior: ScrollBehavior) => {
+    if (scrollFrameRef.current) {
+      window.cancelAnimationFrame(scrollFrameRef.current);
+    }
+
+    scrollFrameRef.current = window.requestAnimationFrame(() => {
+      scrollFrameRef.current = null;
+      const target = document.getElementById(id);
+      if (target) {
+        scrollToHeading(target, behavior);
+      }
+    });
+  }, []);
+
   useEffect(() => {
     setActiveId(current => ids.includes(current) ? current : ids[0] || '');
   }, [ids]);
@@ -144,6 +174,7 @@ export default function TableOfContents({
     if (ids.includes(hashId)) {
       commitActiveId(hashId);
       scheduleForcedActiveIdUpdate(hashId);
+      scheduleHeadingScroll(hashId, 'auto');
     } else {
       updateActiveId({ force: true });
     }
@@ -166,6 +197,7 @@ export default function TableOfContents({
 
       commitActiveId(nextHashId);
       scheduleForcedActiveIdUpdate(nextHashId);
+      scheduleHeadingScroll(nextHashId, 'auto');
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -179,13 +211,17 @@ export default function TableOfContents({
         window.cancelAnimationFrame(syncFrameRef.current);
         syncFrameRef.current = null;
       }
+      if (scrollFrameRef.current) {
+        window.cancelAnimationFrame(scrollFrameRef.current);
+        scrollFrameRef.current = null;
+      }
       if (settleTimerRef.current) window.clearTimeout(settleTimerRef.current);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
       window.removeEventListener('hashchange', syncActiveFromLocation);
       window.removeEventListener('popstate', syncActiveFromLocation);
     };
-  }, [commitActiveId, ids, scheduleForcedActiveIdUpdate, updateActiveId]);
+  }, [commitActiveId, ids, scheduleForcedActiveIdUpdate, scheduleHeadingScroll, updateActiveId]);
 
   useEffect(() => {
     keepActiveLinkVisible(desktopTocRef.current);
@@ -216,12 +252,12 @@ export default function TableOfContents({
 
     window.history.pushState(null, '', `${window.location.pathname}${window.location.search}#${encodeURIComponent(id)}`);
 
-    target?.scrollIntoView({
-      block: 'start',
-      behavior: prefersReducedMotion ? 'auto' : 'smooth',
-    });
+    const mobileToc = event.currentTarget.closest<HTMLDetailsElement>('.table-of-contents-mobile');
+    mobileToc?.removeAttribute('open');
 
-    event.currentTarget.closest<HTMLDetailsElement>('.table-of-contents-mobile')?.removeAttribute('open');
+    if (target) {
+      scheduleHeadingScroll(id, prefersReducedMotion ? 'auto' : 'smooth');
+    }
 
     settleTimerRef.current = window.setTimeout(() => {
       lockUntilRef.current = 0;

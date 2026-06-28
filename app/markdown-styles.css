@@ -18,7 +18,7 @@
   margin-bottom: 0.75em;
   line-height: 1.3;
   letter-spacing: -0.01em;
-  scroll-margin-top: 7rem;
+  scroll-margin-top: clamp(2rem, 6vh, 4rem);
   overflow-wrap: anywhere;
 }
 
