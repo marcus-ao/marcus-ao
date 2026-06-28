@@ -6,17 +6,27 @@ const { execFileSync } = require('child_process');
 const root = process.cwd();
 const contentRoot = path.join(root, 'content');
 const outputDir = path.join(root, 'public', 'fonts');
+// Source fonts are resolved from a repo-local `fonts-src/` folder first (drop the
+// .ttf files there to rebuild the subset on macOS/Linux), then fall back to the
+// Windows system font path. This keeps font rebuilding possible on any OS.
+const localFontDir = path.join(root, 'fonts-src');
+
+function resolveSource(filename, systemPath) {
+  const localPath = path.join(localFontDir, filename);
+  return fs.existsSync(localPath) ? localPath : systemPath;
+}
+
 const fontSources = [
   {
     label: 'Noto Serif SC',
-    source: 'C:\\Windows\\Fonts\\NotoSerifSC-VF.ttf',
+    source: resolveSource('NotoSerifSC-VF.ttf', 'C:\\Windows\\Fonts\\NotoSerifSC-VF.ttf'),
     output: path.join(outputDir, 'noto-serif-sc-subset.woff2'),
     ogOutput: path.join(outputDir, 'noto-serif-sc-subset.woff'),
-    ogSource: 'C:\\Windows\\Fonts\\Deng.ttf',
+    ogSource: resolveSource('Deng.ttf', 'C:\\Windows\\Fonts\\Deng.ttf'),
   },
   {
     label: 'Noto Sans SC',
-    source: 'C:\\Windows\\Fonts\\NotoSansSC-VF.ttf',
+    source: resolveSource('NotoSansSC-VF.ttf', 'C:\\Windows\\Fonts\\NotoSansSC-VF.ttf'),
     output: path.join(outputDir, 'noto-sans-sc-subset.woff2'),
   },
 ];
@@ -38,9 +48,19 @@ async function collectTextFiles(dir) {
 function extractChars(text) {
   const chars = new Set(baseSubsetChars);
   for (const char of text) {
-    if (/[\u3000-\u303f\uff00-\uffef\u3400-\u9fff\uf900-\ufaff]/u.test(char)) {
-      chars.add(char);
-    }
+    const code = char.codePointAt(0);
+    // ASCII is rendered by the Latin web fonts; C0/C1 control characters and
+    // whitespace never need a glyph. EVERYTHING else that actually appears in
+    // the content \u2014 CJK, fullwidth & CJK punctuation, and symbols such as
+    // \u2103 \u2109 \u2116 \u00b1 \u00d7 \u00f7 and en/em dashes \u2014 must be in the subset. Otherwise those
+    // characters fall back to a system font (e.g. PingFang on macOS) whose
+    // metrics differ from Noto, making glyphs look uneven in size/weight
+    // within the same line. Subsetting by the characters actually used (rather
+    // than a fixed list of Unicode blocks) guarantees nothing is ever missed.
+    if (code < 0x80) continue;
+    if (code >= 0x80 && code <= 0x9f) continue;
+    if (/\s/u.test(char)) continue;
+    chars.add(char);
   }
   return Array.from(chars).join('');
 }

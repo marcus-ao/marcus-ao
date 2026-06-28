@@ -12,7 +12,11 @@ const compat = new FlatCompat({
 const eslintConfig = [
   {
     ignores: [
+      ".agents/**",
+      ".claude/**",
+      ".codex/**",
       ".next/**",
+      "fonts-src/**",
       "node_modules/**",
       "out/**",
       "public/**",

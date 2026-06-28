@@ -49,5 +49,10 @@ docs/
 /public/content/
 /public/search-index.json
 
+# local source fonts for re-subsetting (large; only needed to rebuild public/fonts)
+/fonts-src/
+
 # editor / tooling
 .claude/
+.codex/
+.agents/
