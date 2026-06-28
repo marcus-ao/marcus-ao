@@ -375,6 +375,8 @@ html {
 }
 
 .search-panel {
+  display: flex;
+  flex-direction: column;
   width: min(680px, 100%);
   max-height: min(72vh, 720px);
   max-height: min(72dvh, 720px);
@@ -421,6 +423,8 @@ html {
 }
 
 .search-results {
+  flex: 1 1 auto;
+  min-height: 0;
   max-height: calc(min(72vh, 720px) - 57px);
   max-height: calc(min(72dvh, 720px) - 57px);
   overflow: auto;
@@ -435,6 +439,7 @@ html {
   border-radius: 6px;
   color: var(--foreground);
   text-decoration: none;
+  overflow-wrap: anywhere;
   transition: background-color 0.16s var(--ease-standard), border-color 0.16s var(--ease-standard), box-shadow 0.16s var(--ease-standard);
 }
 
@@ -897,8 +902,8 @@ h3 {
 .email-info-box {
   position: relative;
   width: 100%;
-  max-width: 400px;
-  max-height: min(100%, 560px);
+  max-width: 500px;
+  max-height: min(calc(100dvh - 30px), 560px);
   overflow-y: auto;
   box-sizing: border-box;
   padding: 1.75rem;
@@ -915,6 +920,10 @@ h3 {
   align-items: center;
   gap: 0.85rem;
   margin-bottom: 1.25rem;
+}
+
+.email-info-header > div {
+  min-width: 0;
 }
 
 .email-info-icon {
@@ -947,9 +956,9 @@ h3 {
 .email-address-field {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  justify-content: center;
   box-sizing: border-box;
-  padding: 0.55rem 0.6rem 0.55rem 0.85rem;
+  padding: 0.72rem 0.95rem;
   border: 1px solid var(--border);
   border-radius: 12px;
   background-color: var(--email-address-bg);
@@ -962,58 +971,19 @@ h3 {
 }
 
 .email-address-text {
+  display: block;
   flex: 1;
   min-width: 0;
   color: var(--foreground);
   font-family: var(--font-body-latin), system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 1rem;
+  font-size: clamp(0.82rem, 3.6vw, 1rem);
   font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   line-height: 1.45;
+  overflow: visible;
+  text-align: center;
+  text-overflow: clip;
+  white-space: nowrap;
   user-select: all;
-}
-
-.email-address-copy {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  width: 34px;
-  height: 34px;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  background-color: var(--background);
-  color: var(--muted-foreground);
-  cursor: pointer;
-  transition: color 0.2s var(--ease-standard), border-color 0.2s var(--ease-standard), background-color 0.2s var(--ease-standard), transform 0.15s var(--ease-standard);
-}
-
-.email-address-copy:hover,
-.email-address-copy:focus-visible {
-  color: var(--primary);
-  border-color: var(--primary);
-}
-
-.email-address-copy:active {
-  transform: scale(0.94);
-}
-
-.email-address-copy.is-copied {
-  color: var(--code-success-bg);
-  border-color: var(--code-success-bg);
-}
-
-.email-address-copy.is-failed {
-  color: var(--code-danger-bg);
-  border-color: var(--code-danger-bg);
-}
-
-.email-address-copy svg {
-  width: 17px;
-  height: 17px;
 }
 
 .email-actions {
@@ -1111,8 +1081,7 @@ h3 {
   .scroll-to-top:focus-visible,
   .email-copy-button:hover,
   .email-copy-button:focus-visible,
-  .email-copy-button:active,
-  .email-address-copy:active {
+  .email-copy-button:active {
     transform: none;
   }
 }
@@ -1126,6 +1095,12 @@ h3 {
   .search-trigger {
     width: 40px;
     height: 40px;
+  }
+
+  .theme-toggle-placeholder {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
   }
 
   .scroll-to-top {

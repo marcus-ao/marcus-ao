@@ -1,7 +1,16 @@
 "use client";
 
 import SocialIcon from './SocialIcon';
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
+  type TouchEvent as ReactTouchEvent,
+} from 'react';
 import { usePageLocale } from './usePageLocale';
 
 type EmailButtonProps = {
@@ -15,7 +24,6 @@ export default function EmailButton({ email, icon, name }: EmailButtonProps) {
   const [showEmailInfo, setShowEmailInfo] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [copyError, setCopyError] = useState(false);
-  const [clipboardAvailable, setClipboardAvailable] = useState(false);
   const dialogId = useId();
   const dialogTitleId = useId();
   const dialogDescId = useId();
@@ -23,11 +31,10 @@ export default function EmailButton({ email, icon, name }: EmailButtonProps) {
   const copyButtonRef = useRef<HTMLButtonElement>(null);
   const copyFeedbackTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const focusFrameRef = useRef<number | null>(null);
+  const lastPointerCopyRef = useRef(0);
   const labels = isChineseLocale
     ? {
       copied: '已复制',
-      copy: '复制',
-      copyAddress: '复制邮箱地址',
       copyFailed: '复制失败',
       copyFailedFeedback: '复制失败。请手动选中邮箱地址复制。',
       copiedFeedback: '已复制到剪贴板。',
@@ -35,12 +42,9 @@ export default function EmailButton({ email, icon, name }: EmailButtonProps) {
       copyEmail: '复制邮箱',
       title: '我的邮箱地址',
       subtitle: '随时欢迎来信交流。',
-      tryAgain: '重试复制',
     }
     : {
       copied: 'Copied',
-      copy: 'Copy',
-      copyAddress: 'Copy email address',
       copyFailed: 'Copy failed',
       copyFailedFeedback: 'Copy failed. Select the address and copy it manually.',
       copiedFeedback: 'Copied to clipboard.',
@@ -48,12 +52,7 @@ export default function EmailButton({ email, icon, name }: EmailButtonProps) {
       copyEmail: 'Copy email',
       title: 'My Email Address',
       subtitle: 'Feel free to reach out anytime.',
-      tryAgain: 'Try copying again',
     };
-
-  useEffect(() => {
-    setClipboardAvailable(typeof navigator !== 'undefined' && Boolean(navigator.clipboard));
-  }, []);
 
   const clearCopyFeedbackTimer = useCallback(() => {
     if (copyFeedbackTimeout.current) {
@@ -159,7 +158,7 @@ export default function EmailButton({ email, icon, name }: EmailButtonProps) {
     resetCopyFeedback();
   };
 
-  const fallbackCopyToClipboard = () => {
+  const copyWithSelectionFallback = (): boolean => {
     let textArea: HTMLTextAreaElement | null = null;
 
     try {
@@ -183,33 +182,87 @@ export default function EmailButton({ email, icon, name }: EmailButtonProps) {
       document.body.appendChild(textArea);
       textArea.focus();
       textArea.select();
+      textArea.setSelectionRange(0, email.length);
 
-      const successful = document.execCommand("copy");
-
-      if (successful) {
-        markCopySuccess();
-      } else {
-        markCopyError();
-      }
+      return document.execCommand("copy");
     } catch (err) {
       console.error('The fallback copy method also failed: ', err);
-      markCopyError();
+      return false;
     } finally {
       textArea?.remove();
     }
   };
 
   const copyToClipboard = () => {
-    if (clipboardAvailable) {
-      void navigator.clipboard.writeText(email)
-        .then(markCopySuccess)
-        .catch(err => {
-          console.error('Unable to copy to the clipboard: ', err);
-          fallbackCopyToClipboard();
-        });
-    } else {
-      fallbackCopyToClipboard();
+    try {
+      if (copyWithSelectionFallback()) {
+        markCopySuccess();
+        return;
+      }
+
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        let settled = false;
+        const timeout = window.setTimeout(() => {
+          if (!settled) {
+            settled = true;
+            markCopyError();
+          }
+        }, 1000);
+
+        void navigator.clipboard.writeText(email)
+          .then(() => {
+            if (settled) return;
+            settled = true;
+            window.clearTimeout(timeout);
+            markCopySuccess();
+          })
+          .catch((err) => {
+            if (settled) return;
+            settled = true;
+            window.clearTimeout(timeout);
+            console.error('Unable to copy to the clipboard: ', err);
+            markCopyError();
+          });
+      } else {
+        markCopyError();
+      }
+    } catch (err) {
+      console.error('Unable to copy to the clipboard: ', err);
+      markCopyError();
     }
+  };
+
+  const copyToClipboardFromPointer = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (event.button !== 0) return;
+
+    lastPointerCopyRef.current = Date.now();
+    copyToClipboard();
+  };
+
+  const copyToClipboardFromMouse = (event: ReactMouseEvent<HTMLButtonElement>) => {
+    if (event.button !== 0 || Date.now() - lastPointerCopyRef.current < 700) {
+      return;
+    }
+
+    lastPointerCopyRef.current = Date.now();
+    copyToClipboard();
+  };
+
+  const copyToClipboardFromTouch = (_event: ReactTouchEvent<HTMLButtonElement>) => {
+    if (Date.now() - lastPointerCopyRef.current < 700) {
+      return;
+    }
+
+    lastPointerCopyRef.current = Date.now();
+    copyToClipboard();
+  };
+
+  const copyToClipboardFromClick = () => {
+    if (Date.now() - lastPointerCopyRef.current < 700) {
+      return;
+    }
+
+    copyToClipboard();
   };
 
   return (
@@ -254,30 +307,6 @@ export default function EmailButton({ email, icon, name }: EmailButtonProps) {
 
             <div className="email-address-field">
               <span className="email-address-text">{email}</span>
-              <button
-                type="button"
-                className={`email-address-copy${copySuccess ? ' is-copied' : ''}${copyError ? ' is-failed' : ''}`}
-                onClick={copyToClipboard}
-                title={copySuccess ? labels.copied : copyError ? labels.copyFailed : labels.copy}
-                aria-label={copySuccess ? labels.copied : copyError ? labels.tryAgain : labels.copyAddress}
-              >
-                {copySuccess ? (
-                  <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                ) : copyError ? (
-                  <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                    <line x1="12" y1="9" x2="12" y2="13"></line>
-                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                  </svg>
-                ) : (
-                  <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                  </svg>
-                )}
-              </button>
             </div>
 
             <div className="email-actions">
@@ -285,7 +314,10 @@ export default function EmailButton({ email, icon, name }: EmailButtonProps) {
                 type="button"
                 ref={copyButtonRef}
                 className={`email-copy-button${copySuccess ? ' is-copied' : ''}${copyError ? ' is-failed' : ''}`}
-                onClick={copyToClipboard}
+                onClick={copyToClipboardFromClick}
+                onMouseDown={copyToClipboardFromMouse}
+                onPointerDown={copyToClipboardFromPointer}
+                onTouchStart={copyToClipboardFromTouch}
               >
                 {copySuccess ? labels.copied : copyError ? labels.copyFailed : labels.copyEmail}
               </button>
