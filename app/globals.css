@@ -897,7 +897,7 @@ h3 {
 .email-info-box {
   position: relative;
   width: 100%;
-  max-width: 384px;
+  max-width: 400px;
   max-height: min(100%, 560px);
   overflow-y: auto;
   box-sizing: border-box;
@@ -965,9 +965,12 @@ h3 {
   flex: 1;
   min-width: 0;
   color: var(--foreground);
+  font-family: var(--font-body-latin), system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 1rem;
   font-weight: 600;
-  word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   line-height: 1.45;
   user-select: all;
 }
