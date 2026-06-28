@@ -41,6 +41,8 @@ export function toPostCardData(post: PostCardSource, fallbackSection: ContentSec
     ? post.href
     : externalHref || createPostHref(section, post.slug);
 
+  const readingTimeMinutes = post.readingTimeMinutes;
+
   return {
     title: post.frontmatter.title || post.slug,
     image: getPostImage(post.frontmatter.image, section),
@@ -53,5 +55,10 @@ export function toPostCardData(post: PostCardSource, fallbackSection: ContentSec
     link,
     external: hasIndexedPostFields(post) ? post.external : Boolean(externalHref),
     locale,
+    album: post.frontmatter.album || undefined,
+    artist: post.frontmatter.artist || undefined,
+    albumDate: post.frontmatter.albumDate || undefined,
+    tags: Array.isArray(post.frontmatter.tags) ? post.frontmatter.tags : [],
+    readingTime: readingTimeMinutes && readingTimeMinutes > 0 ? `${readingTimeMinutes} min read` : undefined,
   };
 }

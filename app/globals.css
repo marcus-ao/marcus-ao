@@ -300,15 +300,18 @@ html {
 .site-header {
   width: 100%;
   box-sizing: border-box;
-  padding: var(--space-5);
+  padding: var(--space-5) 0;
 }
 
 .site-nav {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  width: min(1200px, 100%);
+  width: 100%;
+  max-width: 64rem;
   margin: 0 auto;
+  box-sizing: border-box;
+  padding-inline: 1.25rem;
 }
 
 .theme-toggle {
@@ -524,11 +527,12 @@ h3 {
   display: grid;
   grid-template-columns: minmax(0, 75ch) clamp(9rem, 10vw, 11.5rem);
   gap: clamp(var(--space-5), 4vw, var(--space-7));
-  max-width: min(1500px, calc(100% - 3rem));
+  width: 100%;
+  max-width: 64rem;
   margin: 2rem auto;
-  padding: 1rem;
+  padding: 1rem 1.25rem;
   box-sizing: border-box;
-  justify-content: center;
+  justify-content: space-between;
 }
 
 .reading-progress {
@@ -1088,7 +1092,11 @@ h3 {
 
 @media (max-width: 768px) {
   .site-header {
-    padding: 15px;
+    padding: 15px 0;
+  }
+
+  .site-nav {
+    padding-inline: 15px;
   }
 
   .theme-toggle,
@@ -1187,7 +1195,11 @@ h3 {
   }
 
   .site-header {
-    padding: 15px 10px;
+    padding: 15px 0;
+  }
+
+  .site-nav {
+    padding-inline: 10px;
   }
 
   .search-overlay {

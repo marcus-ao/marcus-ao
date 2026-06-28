@@ -60,7 +60,10 @@ export default function BackToTop({ label = 'Back to the top' }: BackToTopProps)
     <button
       type="button"
       className={`scroll-to-top ${isAccessible ? 'visible' : ''}`}
-      onClick={scrollToTop}
+      onClick={(event) => {
+        scrollToTop();
+        event.currentTarget.blur();
+      }}
       onFocus={() => setHasFocus(true)}
       onBlur={() => setHasFocus(false)}
       aria-label={label}

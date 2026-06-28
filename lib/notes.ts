@@ -30,6 +30,9 @@ export interface Frontmatter {
   description?: string;
   image?: string;
   external?: string;
+  album?: string;
+  artist?: string;
+  albumDate?: string;
   [key: string]: unknown;
 }
 
@@ -45,6 +48,7 @@ export interface NoteData {
 export interface NoteListItem {
   slug: string;
   frontmatter: Frontmatter;
+  readingTimeMinutes?: number;
 }
 
 export type ContentSection = 'share' | 'blog';
@@ -223,11 +227,17 @@ function normalizeFrontmatter(data: Record<string, unknown>, markdown: string, s
   const rawDescription = data.description;
   const rawImage = data.image;
   const rawExternal = data.external;
+  const rawAlbum = data.album;
+  const rawArtist = data.artist;
+  const rawAlbumDate = data.albumDate;
 
   frontmatter.title = normalizeTextField(rawTitle);
   frontmatter.description = normalizeTextField(rawDescription);
   frontmatter.image = normalizeTextField(rawImage);
   frontmatter.external = normalizeExternalUrl(rawExternal);
+  frontmatter.album = normalizeTextField(rawAlbum);
+  frontmatter.artist = normalizeTextField(rawArtist);
+  frontmatter.albumDate = normalizeTextField(rawAlbumDate);
 
   if (rawDate instanceof Date) {
     frontmatter.date = rawDate.toISOString().slice(0, 10);
@@ -742,6 +752,7 @@ export async function getSortedPostsData(section: ContentSection): Promise<NoteL
       return {
         slug,
         frontmatter,
+        readingTimeMinutes: estimateReadingTime(matterResult.content),
       };
     } catch (mapError) {
       console.error(`Error processing frontmatter for ${slug}.md:`, mapError);
