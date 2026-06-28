@@ -1136,9 +1136,38 @@ h3 {
   }
 
   .table-of-contents-mobile summary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     cursor: pointer;
+    list-style: none;
+    font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", var(--font-body-latin), system-ui, sans-serif;
     font-weight: 700;
+    line-height: 1.35;
     color: var(--primary);
+  }
+
+  .table-of-contents-mobile summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .table-of-contents-mobile summary::marker {
+    content: "";
+  }
+
+  .table-of-contents-mobile summary::before {
+    content: "";
+    flex: 0 0 auto;
+    width: 0;
+    height: 0;
+    border-top: 0.36em solid transparent;
+    border-bottom: 0.36em solid transparent;
+    border-left: 0.48em solid currentColor;
+    transition: transform 0.2s var(--ease-standard);
+  }
+
+  .table-of-contents-mobile[open] summary::before {
+    transform: rotate(90deg);
   }
 
   .table-of-contents-mobile .toc-list {
