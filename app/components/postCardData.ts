@@ -10,7 +10,7 @@ const fallbackImages: Record<ContentSection, string> = {
 
 const sectionLocales: Record<ContentSection, string> = {
   blog: 'en-US',
-  share: 'en-US',
+  share: 'zh-CN',
 };
 
 type PostCardSource = NoteListItem | IndexedPost;
@@ -33,9 +33,17 @@ export function isChinesePostCardLocale(locale?: string): boolean {
   return Boolean(locale?.toLowerCase().startsWith('zh'));
 }
 
+function getPostLocale(post: PostCardSource, section: ContentSection): string {
+  const locale = typeof post.frontmatter.locale === 'string'
+    ? post.frontmatter.locale.trim()
+    : '';
+
+  return locale || sectionLocales[section];
+}
+
 export function toPostCardData(post: PostCardSource, fallbackSection: ContentSection): PostCardData {
   const section = hasIndexedPostFields(post) ? post.section : fallbackSection;
-  const locale = sectionLocales[section];
+  const locale = getPostLocale(post, section);
   const externalHref = post.frontmatter.external;
   const link = hasIndexedPostFields(post)
     ? post.href
@@ -59,6 +67,8 @@ export function toPostCardData(post: PostCardSource, fallbackSection: ContentSec
     artist: post.frontmatter.artist || undefined,
     albumDate: post.frontmatter.albumDate || undefined,
     tags: Array.isArray(post.frontmatter.tags) ? post.frontmatter.tags : [],
-    readingTime: readingTimeMinutes && readingTimeMinutes > 0 ? `${readingTimeMinutes} min read` : undefined,
+    readingTime: readingTimeMinutes && readingTimeMinutes > 0
+      ? isChinesePostCardLocale(locale) ? `约 ${readingTimeMinutes} 分钟阅读` : `${readingTimeMinutes} min read`
+      : undefined,
   };
 }

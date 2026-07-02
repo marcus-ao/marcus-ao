@@ -16,6 +16,14 @@ const unnamedPostTitle = 'An Unnamed Post';
 const fallbackPostDescription = 'A blog post by Marcus Ao.';
 const missingPostTitle = 'Post not found - Marcus Ao';
 
+function getArticleLocale(post: NoteData): string {
+  const locale = typeof post.frontmatter.locale === 'string'
+    ? post.frontmatter.locale.trim()
+    : '';
+
+  return locale || 'en-US';
+}
+
 export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
   const posts = await getSortedPostsData('blog');
 
@@ -60,15 +68,18 @@ export default async function BlogPostPage({ params: paramsPromise }: PageProps)
     notFound();
   }
 
+  const locale = getArticleLocale(postData);
+  const isChineseLocale = locale.toLowerCase().startsWith('zh');
+
   return (
     <ArticlePageShell
       adjacent={adjacent}
-      dateLabel="Published:"
-      locale="en-US"
-      nextLabel="Next"
+      dateLabel={isChineseLocale ? '发布于:' : 'Published:'}
+      locale={locale}
+      nextLabel={isChineseLocale ? '下一篇' : 'Next'}
       post={postData as NoteData}
-      previousLabel="Previous"
-      readingTimeLabel={(minutes) => `${minutes} min read`}
+      previousLabel={isChineseLocale ? '上一篇' : 'Previous'}
+      readingTimeLabel={(minutes) => isChineseLocale ? `约 ${minutes} 分钟阅读` : `${minutes} min read`}
       section="blog"
     />
   );

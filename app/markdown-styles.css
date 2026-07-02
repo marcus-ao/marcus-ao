@@ -3,6 +3,25 @@
   line-height: 1.7; /* 行高设置 */
   color: var(--foreground);
   overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.markdown-body :where(p, li, blockquote, figcaption, .callout, .callout-content) {
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.article-content:lang(zh) .markdown-body,
+.article-content:lang(zh-CN) .markdown-body {
+  line-height: 1.78;
+  line-break: strict;
+  text-wrap: pretty;
+}
+
+.article-content:lang(zh) .markdown-body :where(p, li, blockquote, figcaption, .callout, .callout-content),
+.article-content:lang(zh-CN) .markdown-body :where(p, li, blockquote, figcaption, .callout, .callout-content) {
+  line-break: strict;
 }
 
 /* 标题 */
@@ -19,7 +38,8 @@
   line-height: 1.3;
   letter-spacing: -0.01em;
   scroll-margin-top: clamp(2rem, 6vh, 4rem);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 .markdown-body h1 {
@@ -199,13 +219,26 @@
 
 /* 引用块 */
 .markdown-body blockquote {
+  position: relative;
   margin: 1.5em 0;
-  padding: 0.8em 1.5em;
-  border-left: 4px solid var(--primary);
-  background-color: var(--secondary);
-  color: var(--muted-foreground);
+  padding: 1.05em 1.35em 1.05em 1.55em;
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, var(--border));
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--primary) 8%, transparent), transparent 48%),
+    color-mix(in srgb, var(--surface) 86%, var(--background));
+  color: color-mix(in srgb, var(--foreground) 78%, var(--muted-foreground));
   font-style: normal;
-  border-radius: 4px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.04);
+}
+
+.markdown-body blockquote::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  border-radius: 10px 0 0 10px;
+  background: linear-gradient(180deg, var(--primary), color-mix(in srgb, var(--primary) 45%, transparent));
 }
 
 .markdown-body blockquote p:last-child {
@@ -234,6 +267,22 @@
   background-color: var(--accent);
 }
 
+.markdown-body img.zoomable-image {
+  cursor: zoom-in;
+  transition: box-shadow 0.2s var(--ease-standard), filter 0.2s var(--ease-standard), transform 0.2s var(--ease-standard);
+}
+
+.markdown-body img.zoomable-image:hover {
+  filter: saturate(1.03) contrast(1.02);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.12);
+}
+
+.markdown-body img.zoomable-image:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+}
+
 .markdown-body figure img {
   margin: 0 auto;
 }
@@ -244,6 +293,134 @@
   font-size: 0.88em;
   line-height: 1.5;
   text-align: center;
+}
+
+.image-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--background) 82%, black 18%);
+  backdrop-filter: blur(18px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s var(--ease-standard);
+}
+
+.image-lightbox.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.image-lightbox-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: clamp(1rem, 2.5vh, 2rem) clamp(1rem, 2.5vw, 2rem) 5.5rem;
+  touch-action: none;
+}
+
+.image-lightbox-stage.is-zoomed {
+  cursor: grab;
+}
+
+.image-lightbox-stage.is-grabbing {
+  cursor: grabbing;
+}
+
+.image-lightbox-img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.32);
+  transform-origin: center center;
+  transition: transform 0.16s var(--ease-standard);
+  cursor: zoom-in;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.image-lightbox-stage.is-zoomed .image-lightbox-img {
+  cursor: grab;
+}
+
+.image-lightbox-stage.is-grabbing .image-lightbox-img {
+  cursor: grabbing;
+  transition: none;
+}
+
+.image-lightbox-toolbar {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(1rem, 3vh, 1.75rem);
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: auto;
+  padding: 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24), inset 0 1px 0 color-mix(in srgb, white 16%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+.image-lightbox-btn {
+  width: 2.35rem;
+  height: 2.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+  border-radius: 999px;
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--background) 84%, transparent);
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease-standard), border-color 0.2s var(--ease-standard), color 0.2s var(--ease-standard), transform 0.2s var(--ease-standard), box-shadow 0.2s var(--ease-standard);
+}
+
+.image-lightbox-btn svg {
+  width: 1.08rem;
+  height: 1.08rem;
+}
+
+.image-lightbox-btn:hover,
+.image-lightbox-btn:focus-visible {
+  color: var(--on-primary);
+  background: var(--primary);
+  border-color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--primary) 28%, transparent);
+}
+
+.image-lightbox-btn.is-success {
+  color: var(--code-status-text);
+  background: var(--code-success-bg);
+  border-color: transparent;
+}
+
+.image-lightbox-btn.is-failed {
+  color: var(--code-status-text);
+  background: var(--code-danger-bg);
+  border-color: transparent;
+}
+
+.image-lightbox-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* GFM tables */
@@ -309,16 +486,16 @@
 /* 代码块基础样式 */
 .markdown-body pre {
   position: relative;
-  margin: 1.5rem 0;
+  margin: 1.75rem 0;
   padding: 0;
-  border-radius: 8px;
+  border-radius: 10px;
   overflow: hidden;
-  background-color: var(--pre-bg);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--pre-bg) 92%, white 8%), var(--pre-bg));
   color: var(--pre-text);
-  border: 1px solid var(--pre-border);
-  box-shadow: var(--code-shadow);
-  /* 添加窗口标题栏样式 */
-  --window-controls-width: 70px;
+  border: 1px solid color-mix(in srgb, var(--pre-border) 82%, var(--foreground) 18%);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.10), 0 2px 8px rgba(0, 0, 0, 0.06);
+  --window-controls-width: 7rem;
 }
 
 /* 亮色模式变量 */
@@ -349,27 +526,43 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 30px;
-  background-color: var(--title-bar-bg);
+  height: 46px;
+  background:
+    radial-gradient(circle at 16px 0, color-mix(in srgb, white 14%, transparent), transparent 44px),
+    linear-gradient(180deg, color-mix(in srgb, var(--title-bar-bg) 92%, white 8%), var(--title-bar-bg));
   display: flex;
   align-items: center;
-  padding: 0 12px;
+  padding: 0 0.95rem;
   border-bottom: 1px solid var(--pre-border);
   z-index: 10;
+  overflow: hidden;
+}
+
+.markdown-body pre .window-controls::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, white 8%, transparent), transparent);
+  opacity: 0.45;
 }
 
 /* 窗口操作按钮 */
 .markdown-body pre .window-dots {
   display: flex;
   align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 12;
 }
 
 .markdown-body pre .window-dot {
-  width: 12px;
-  height: 12px;
-  margin-right: 6px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
-  border: 1px solid var(--window-dot-border);
+  border: 0;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #000 14%, transparent);
 }
 
 .markdown-body pre .window-dot.close {
@@ -390,24 +583,27 @@
   top: 0;
   left: var(--window-controls-width, 70px);
   right: var(--window-controls-width, 70px);
-  height: 30px;
-  line-height: 30px;
+  height: 46px;
+  line-height: 46px;
   text-align: center;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--lang-badge-text);
-  background-color: var(--title-bar-bg);
+  font-family: var(--font-code);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: color-mix(in srgb, var(--lang-badge-text) 86%, transparent);
+  background: transparent;
   z-index: 10;
   pointer-events: none;
 }
 
 /* 代码容器 */
 .markdown-body pre .code-container {
-  padding: 40px 20px 20px 20px;
+  padding: 62px 1.25rem 1.25rem;
   overflow-x: auto;
-  font-family: "JetBrains Mono", "Fira Code", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-family: var(--font-code);
+  font-size: 0.92rem;
+  line-height: 1.72;
+  scrollbar-gutter: stable;
 }
 
 .markdown-body pre .code-container:focus-visible {
@@ -415,30 +611,61 @@
   outline-offset: -4px;
 }
 
+.markdown-body pre .code-block-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-left: auto;
+  position: relative;
+  z-index: 12;
+}
+
 /* 复制按钮样式 */
 .markdown-body pre .code-block-copy-button {
-  position: absolute;
-  top: 3.5px;
-  right: 12px;
-  min-width: 4.5rem;
-  padding: 0.25rem 0.6rem;
-  font-size: 0.8rem;
-  font-weight: 500;
-  line-height: 1.35;
+  position: relative;
+  min-width: 4.35rem;
+  height: 30px;
+  padding: 0 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.42rem;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1;
   color: var(--copy-btn-text);
-  background-color: var(--copy-btn-bg);
-  border: 1px solid transparent;
-  border-radius: 5px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--copy-btn-bg) 88%, white 12%), var(--copy-btn-bg));
+  border: 1px solid color-mix(in srgb, var(--pre-border) 72%, transparent);
+  border-radius: 999px;
   cursor: pointer;
   text-align: center;
   white-space: nowrap;
   transition: background-color 0.2s var(--ease-standard), border-color 0.2s var(--ease-standard), box-shadow 0.2s var(--ease-standard), color 0.2s var(--ease-standard), opacity 0.2s var(--ease-standard), transform 0.2s var(--ease-standard);
   z-index: 11;
-  opacity: 0.8;
+  opacity: 0.92;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), inset 0 1px 0 color-mix(in srgb, white 16%, transparent);
+}
+
+.markdown-body pre .code-block-copy-button .cb-icon,
+.markdown-body .code-block-expand-button .cb-icon {
+  display: inline-flex;
+  width: 1rem;
+  height: 1rem;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.markdown-body pre .code-block-copy-button svg,
+.markdown-body .code-block-expand-button svg {
+  width: 1rem;
+  height: 1rem;
 }
 
 .markdown-body pre .code-block-copy-button:hover {
-  background-color: var(--primary);
+  background: var(--primary);
   color: var(--on-primary);
   border-color: var(--primary);
   opacity: 1;
@@ -475,27 +702,39 @@
 
 /* 展开/折叠按钮 */
 .markdown-body .code-block-expand-button {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
   width: fit-content;
-  margin: 0.8rem auto; /* 调整上下边距 */
-  padding: 0.5rem 1.2rem;
-  font-size: 0.875rem; /* 调整字体大小 */
-  font-weight: 500;    /* 增加字重 */
+  margin: 0.9rem auto 1.2rem;
+  padding: 0.58rem 1.12rem;
+  font-size: 0.875rem;
+  font-weight: 650;
   color: var(--expand-btn-text);
-  background-color: var(--expand-btn-bg);
-  border: 1px solid transparent; /* 添加透明边框 */
-  border-radius: 6px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--expand-btn-bg) 90%, white 10%), var(--expand-btn-bg));
+  border: 1px solid color-mix(in srgb, var(--border) 82%, var(--foreground) 18%);
+  border-radius: 999px;
   cursor: pointer;
   transition: background-color 0.2s var(--ease-standard), border-color 0.2s var(--ease-standard), box-shadow 0.2s var(--ease-standard), color 0.2s var(--ease-standard), transform 0.2s var(--ease-standard);
-  box-shadow: var(--code-control-shadow); /* 调整阴影 */
+  box-shadow: var(--code-control-shadow);
+}
+
+.markdown-body .code-block-expand-button .cb-icon {
+  transition: transform 0.2s var(--ease-standard);
+}
+
+.markdown-body .code-block-expand-button[aria-expanded="true"] .cb-icon {
+  transform: rotate(180deg);
 }
 
 .markdown-body .code-block-expand-button:hover {
-  background-color: var(--primary); /* 悬停时使用主题的主色作为背景 */
-  color: var(--on-primary); /* 悬停时文字颜色 */
-  border-color: var(--primary); /* 悬停时边框颜色 */
-  transform: translateY(-2px); /* 更明显的上移效果 */
-  box-shadow: var(--code-control-shadow-hover); /* 调整阴影 */
+  background: var(--primary);
+  color: var(--on-primary);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: var(--code-control-shadow-hover);
 }
 
 .markdown-body .code-block-expand-button:focus-visible {
@@ -665,27 +904,59 @@
   --callout-accent: var(--primary);
   --callout-background: var(--secondary);
   --callout-title-color: var(--primary);
-  padding: 1em 1.5em;
+  --callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 11v5'/%3E%3Cpath d='M12 8h.01'/%3E%3C/svg%3E");
+  position: relative;
+  overflow: hidden;
+  padding: 1.15em 1.45em 1.2em;
   margin: 1.5em 0;
-  border-left-width: 4px;
-  border-left-style: solid;
-  border-left-color: var(--callout-accent);
-  border-radius: 6px;
-  background-color: var(--callout-background);
-  box-shadow: var(--callout-shadow);
+  border: 1px solid color-mix(in srgb, var(--callout-accent) 26%, var(--border));
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--callout-accent) 14%, transparent), transparent 44%),
+    linear-gradient(180deg, color-mix(in srgb, var(--callout-background) 86%, var(--background)), var(--callout-background));
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.05), var(--callout-shadow);
+}
+
+.markdown-body .callout::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--callout-accent), color-mix(in srgb, var(--callout-accent) 45%, transparent));
 }
 
 .markdown-body .callout-title {
-  font-weight: bold;
+  position: relative;
+  font-weight: 700;
   margin-bottom: 0.5em;
   display: flex;
   align-items: center;
   gap: 0.5em;
   color: var(--callout-title-color);
+  letter-spacing: 0.005em;
+  text-transform: none;
+}
+
+.markdown-body .callout-title::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 1.15em;
+  height: 1.15em;
+  background-color: currentColor;
+  -webkit-mask: var(--callout-icon) center / contain no-repeat;
+  mask: var(--callout-icon) center / contain no-repeat;
 }
 
 .markdown-body .callout-type-name {
-  font-size: 0.9em;
+  font-size: 0.88em;
+}
+
+.markdown-body .callout-content {
+  position: relative;
+}
+
+.markdown-body .callout-content > :first-child {
+  margin-top: 0;
 }
 
 .markdown-body .callout-content p:last-child {
@@ -792,6 +1063,7 @@
   --callout-accent: var(--callout-warning-border);
   --callout-background: var(--callout-warning-bg);
   --callout-title-color: var(--callout-warning-title);
+  --callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.6 3.5 2.3 18a1.6 1.6 0 0 0 1.4 2.4h16.6A1.6 1.6 0 0 0 21.7 18L13.4 3.5a1.6 1.6 0 0 0-2.8 0z'/%3E%3Cpath d='M12 9v4'/%3E%3Cpath d='M12 17h.01'/%3E%3C/svg%3E");
 }
 
 .markdown-body .callout-tip,
@@ -801,6 +1073,7 @@
   --callout-accent: var(--callout-tip-border);
   --callout-background: var(--callout-tip-bg);
   --callout-title-color: var(--callout-tip-title);
+  --callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 11.1V12a10 10 0 1 1-5.9-9.1'/%3E%3Cpath d='m9 11 3 3L22 4'/%3E%3C/svg%3E");
 }
 
 .markdown-body .callout-important,
@@ -813,12 +1086,14 @@
   --callout-accent: var(--callout-important-border);
   --callout-background: var(--callout-important-bg);
   --callout-title-color: var(--callout-important-title);
+  --callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7.9 2h8.2L22 7.9v8.2L16.1 22H7.9L2 16.1V7.9L7.9 2z'/%3E%3Cpath d='M12 8v4'/%3E%3Cpath d='M12 16h.01'/%3E%3C/svg%3E");
 }
 
 .markdown-body .callout-example {
   --callout-accent: var(--primary);
   --callout-background: color-mix(in srgb, var(--primary) 9%, var(--background));
   --callout-title-color: var(--primary);
+  --callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m8 6-6 6 6 6'/%3E%3Cpath d='m16 6 6 6-6 6'/%3E%3C/svg%3E");
 }
 
 .markdown-body .callout-quote,
@@ -826,15 +1101,34 @@
   --callout-accent: var(--muted-foreground);
   --callout-background: var(--surface);
   --callout-title-color: var(--muted-foreground);
+  --callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/%3E%3C/svg%3E");
 }
 
 /* KaTeX 数学公式显示模式 - 居中并添加一些边距 */
 .markdown-body .katex-display {
-  margin: 1em 0;
-  padding-bottom: 0.15em;
-  overflow-x: auto; 
+  margin: 1.4em 0;
+  /* 宽公式横向滚动；纵向给足 padding，确保分式/大算符/矩阵等“较高”的公式不被裁切。
+     关键：overflow-x:auto 时若另一轴写成 visible，会被规范强制为 auto 从而纵向裁切，
+     这里改用 overflow-y:hidden 配合足够的纵向 padding，既能横向滚动又不切顶切底。 */
+  padding: 0.85em 0.3em;
+  overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: thin;
+}
+
+.markdown-body .katex {
+  line-height: normal;
+}
+
+.markdown-body .katex-display > .katex {
+  display: inline-block;
+  min-width: max-content;
+  padding: 0.1em 0;
+}
+
+.markdown-body .katex .vlist-t,
+.markdown-body .katex .vlist-r {
+  overflow: visible;
 }
 
 .markdown-body .footnotes,
@@ -939,8 +1233,8 @@
 
 @media (max-width: 480px) {
   .markdown-body pre .code-block-language {
-    left: 56px;
-    right: 74px;
+    left: 4.2rem;
+    right: 5.7rem;
     overflow: hidden;
     text-align: left;
     text-overflow: ellipsis;
@@ -948,13 +1242,30 @@
   }
 
   .markdown-body pre .code-container {
-    padding: 40px 14px 16px;
+    padding: 60px 14px 16px;
     font-size: 0.85rem;
   }
 
   .markdown-body pre .code-block-copy-button {
-    right: 8px;
     min-width: 4rem;
-    padding: 0.25rem 0.45rem;
+    height: 28px;
+    padding: 0 0.5rem;
+  }
+
+  .image-lightbox {
+    padding: 0.75rem;
+  }
+
+  .image-lightbox-img {
+    max-height: calc(100vh - 9rem);
+  }
+
+  .image-lightbox-toolbar {
+    width: min(100%, 28rem);
+    border-radius: 16px;
+  }
+
+  .image-lightbox-status {
+    width: 100%;
   }
 }

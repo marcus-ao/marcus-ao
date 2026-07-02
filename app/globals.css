@@ -18,19 +18,21 @@
 
 @font-face {
   font-family: "Noto Serif SC Subset";
-  src: url("/fonts/noto-serif-sc-subset.woff2") format("woff2");
+  src: url("/fonts/noto-serif-sc-subset.woff") format("woff");
   font-display: swap;
 }
 
 @font-face {
   font-family: "Noto Sans SC Subset";
-  src: url("/fonts/noto-sans-sc-subset.woff2") format("woff2");
+  src: url("/fonts/noto-sans-sc-subset.woff") format("woff");
   font-display: swap;
 }
 
 :root {
   --font-heading: var(--font-heading-latin), "Noto Serif SC Subset", "Noto Serif SC", "Songti SC", "STSong", Georgia, serif;
   --font-body: var(--font-body-latin), "Noto Sans SC Subset", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-heading-cjk: "Noto Serif SC Subset", "Noto Serif SC", "Songti SC", "STSong", "Source Han Serif SC", Georgia, serif;
+  --font-body-cjk: "Noto Sans SC Subset", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
   --font-code: "JetBrains Mono", "Fira Code", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -567,17 +569,52 @@ h3 {
   min-width: 0;
 }
 
+.article-content:lang(zh),
+.article-content:lang(zh-CN) {
+  font-family: var(--font-body-cjk);
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+}
+
+.article-content:lang(zh) .article-header h1,
+.article-content:lang(zh-CN) .article-header h1,
+.article-content:lang(zh) .markdown-body h1,
+.article-content:lang(zh-CN) .markdown-body h1,
+.article-content:lang(zh) .markdown-body h2,
+.article-content:lang(zh-CN) .markdown-body h2,
+.article-content:lang(zh) .markdown-body h3,
+.article-content:lang(zh-CN) .markdown-body h3,
+.article-content:lang(zh) .markdown-body h4,
+.article-content:lang(zh-CN) .markdown-body h4,
+.article-content:lang(zh) .markdown-body h5,
+.article-content:lang(zh-CN) .markdown-body h5,
+.article-content:lang(zh) .markdown-body h6,
+.article-content:lang(zh-CN) .markdown-body h6 {
+  font-family: var(--font-heading-cjk);
+  letter-spacing: 0;
+}
+
+.post-content,
+.post-content h2,
+.post-content p,
+.post-content span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .article-header {
-  margin-bottom: 2rem;
+  margin-bottom: clamp(2.25rem, 1.7rem + 1.4vw, 3.25rem);
 }
 
 .article-header h1 {
   color: var(--foreground);
   font-size: clamp(2rem, 1.3rem + 2.8vw, 2.75rem);
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.18;
   letter-spacing: -0.02em;
   overflow-wrap: anywhere;
+  margin: 0 0 clamp(1.25rem, 0.95rem + 0.8vw, 1.85rem);
 }
 
 .article-meta {
@@ -586,10 +623,13 @@ h3 {
   gap: var(--space-2);
   align-items: center;
   color: var(--muted-foreground);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  margin: 0;
 }
 
 .article-tags {
-  margin-top: var(--space-3);
+  margin-top: clamp(1rem, 0.8rem + 0.5vw, 1.35rem);
 }
 
 .article-adjacent-nav {
@@ -1218,6 +1258,15 @@ h3 {
 @media (max-width: 480px) {
   body {
       line-height: 1.5;
+  }
+
+  .blog-post {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: var(--space-4) !important;
+  }
+
+  .blog-post .post-content {
+    width: 100%;
   }
 
   .site-header {

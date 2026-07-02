@@ -29,6 +29,7 @@ export interface Frontmatter {
   tags?: string[];
   description?: string;
   image?: string;
+  locale?: string;
   external?: string;
   album?: string;
   artist?: string;
@@ -54,6 +55,12 @@ export interface NoteListItem {
 export type ContentSection = 'share' | 'blog';
 
 type AbsoluteAssetPathMode = 'content-root' | 'site-root';
+
+interface ResolvedMarkdownPath {
+  fullPath: string;
+  markdownFileDir: string;
+  normalizedSlug: string;
+}
 
 export interface TocItem {
   id: string;
@@ -137,6 +144,55 @@ const markdownSanitizeSchema: RehypeSanitizeOptions = {
 
 function getSectionDirectory(section: ContentSection): string {
   return path.join(contentDirectory, section);
+}
+
+function isInsideDirectory(rootDirectory: string, candidatePath: string): boolean {
+  const relativePath = path.relative(rootDirectory, candidatePath);
+  return relativePath === ''
+    || (!!relativePath && !relativePath.startsWith('..') && !path.isAbsolute(relativePath));
+}
+
+function getSafeSlugSegments(slug: string): string[] | null {
+  const normalizedSlug = slug.replace(/\\/g, '/').trim();
+
+  if (!normalizedSlug || normalizedSlug.startsWith('/') || normalizedSlug.includes('\0')) {
+    return null;
+  }
+
+  const segments = normalizedSlug.split('/').filter(Boolean);
+
+  if (
+    segments.length === 0
+    || segments.some(segment => segment === '.' || segment === '..' || path.isAbsolute(segment))
+  ) {
+    return null;
+  }
+
+  return segments;
+}
+
+function resolveMarkdownPath(section: ContentSection, slug: string): ResolvedMarkdownPath | null {
+  const sectionDirectory = path.resolve(getSectionDirectory(section));
+  const segments = getSafeSlugSegments(slug);
+
+  if (!segments) {
+    return null;
+  }
+
+  const normalizedSlug = segments.join('/');
+  const fullPath = path.resolve(sectionDirectory, `${normalizedSlug}.md`);
+
+  if (!isInsideDirectory(sectionDirectory, fullPath)) {
+    return null;
+  }
+
+  const markdownFileDir = path.posix.dirname(normalizedSlug);
+
+  return {
+    fullPath,
+    markdownFileDir: markdownFileDir === '.' ? '' : markdownFileDir,
+    normalizedSlug,
+  };
 }
 
 function isPassthroughUrl(url: string): boolean {
@@ -226,6 +282,7 @@ function normalizeFrontmatter(data: Record<string, unknown>, markdown: string, s
   const rawTitle = data.title;
   const rawDescription = data.description;
   const rawImage = data.image;
+  const rawLocale = data.locale;
   const rawExternal = data.external;
   const rawAlbum = data.album;
   const rawArtist = data.artist;
@@ -234,6 +291,7 @@ function normalizeFrontmatter(data: Record<string, unknown>, markdown: string, s
   frontmatter.title = normalizeTextField(rawTitle);
   frontmatter.description = normalizeTextField(rawDescription);
   frontmatter.image = normalizeTextField(rawImage);
+  frontmatter.locale = normalizeTextField(rawLocale);
   frontmatter.external = normalizeExternalUrl(rawExternal);
   frontmatter.album = normalizeTextField(rawAlbum);
   frontmatter.artist = normalizeTextField(rawArtist);
@@ -282,6 +340,18 @@ function escapeHtml(value: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+// CommonMark 的强调（emphasis）flanking 规则在「**」紧邻引号、尤其与中日韩字符相邻时
+// 无法正确配对，导致 **“短语”** 这类写法加粗失效、直接显示出原始星号。这里把
+// 「星号在引号外侧」统一改写为「引号在星号内侧」（**“X”** → “**X**”，单星号、下划线同理），
+// 语义不变但能在所有平台稳定渲染。仅匹配“引号紧贴星号”的窄模式，不影响其它写法与代码。
+function normalizeEmphasisQuotes(markdown: string): string {
+  return markdown.replace(
+    /(\*\*|\*|__|_)(["“])([^"“”*_\n]+?)(["”])\1/g,
+    (_match, marker: string, openQuote: string, inner: string, closeQuote: string) =>
+      `${openQuote}${marker}${inner}${marker}${closeQuote}`,
+  );
 }
 
 function normalizeMarkdownImageDestinations(markdown: string): string {
@@ -427,7 +497,10 @@ const remarkObsidianCallouts: Plugin<[], MdastRoot> = () => {
       if (match) {
         const [, calloutTypeInput, collapseMarker, calloutTitleInput] = match;
         const calloutType = calloutTypeInput.toLowerCase().replace(/[^a-z0-9-]+/g, '-');
-        const calloutTypeLabel = calloutTypeInput.replace(/[-_]+/g, ' ').toUpperCase();
+        const calloutTypeLabel = calloutTypeInput
+          .replace(/[-_]+/g, ' ')
+          .toLowerCase()
+          .replace(/\b\w/g, char => char.toUpperCase());
         const calloutTitle = calloutTitleInput ? calloutTitleInput.trim() : '';
         const isCollapsible = collapseMarker === '+' || collapseMarker === '-';
         const detailsOpenAttribute = collapseMarker === '+' ? ' open' : '';
@@ -444,15 +517,18 @@ const remarkObsidianCallouts: Plugin<[], MdastRoot> = () => {
         if (firstParagraph.children.length === 0 && node.children[0] === firstParagraph) {
             node.children.shift();
         }
-        let titleContentHtml = `<span class="callout-type-name">${escapeHtml(calloutTypeLabel)}</span>`;
+        const showTypeLabel = calloutType !== 'note' || isCollapsible;
+        let titleContentHtml = showTypeLabel
+          ? `<span class="callout-type-name">${escapeHtml(calloutTypeLabel)}</span>`
+          : '';
         if (calloutTitle) {
           titleContentHtml += `<span class="callout-title-text">${escapeHtml(calloutTitle)}</span>`;
         }
-        const titleHtml = `<div class="callout-title">${titleContentHtml}</div>`;
+        const titleHtml = titleContentHtml ? `<div class="callout-title">${titleContentHtml}</div>` : '';
         const openCalloutNode: MdastHTML = {
           type: 'html',
           value: isCollapsible
-            ? `<details class="callout callout-${calloutType}"${detailsOpenAttribute}><summary class="callout-title">${titleContentHtml}</summary><div class="callout-content">`
+            ? `<details class="callout callout-${calloutType}"${detailsOpenAttribute}><summary class="callout-title">${titleContentHtml || `<span class="callout-type-name">${escapeHtml(calloutTypeLabel)}</span>`}</summary><div class="callout-content">`
             : `<div class="callout callout-${calloutType}">${titleHtml}<div class="callout-content">`,
         };
         const closeCalloutNode: MdastHTML = {
@@ -627,7 +703,7 @@ const rehypeWrapTables: Plugin<[{ label?: string }], HastRoot> = (options) => {
 async function markdownToHtml(markdown: string, markdownFileDir?: string, section: ContentSection = 'share'): Promise<{ contentHtml: string; toc: TocItem[] }> {
   const toc: TocItem[] = [];
   const normalizedMarkdown = separateStandaloneImageLines(
-    normalizeMarkdownImageDestinations(markdown),
+    normalizeMarkdownImageDestinations(normalizeEmphasisQuotes(markdown)),
   );
   const result = await unified()
     .use(remarkParse) 
@@ -707,8 +783,15 @@ export async function getNoteData(slug: string): Promise<NoteData | null> {
 }
 
 export async function getPostData(section: ContentSection, slug: string): Promise<NoteData | null> {
-  const sectionDirectory = getSectionDirectory(section);
-  const fullPath = path.join(sectionDirectory, `${slug}.md`);
+  const resolvedPath = resolveMarkdownPath(section, slug);
+
+  if (!resolvedPath) {
+    console.warn(`Rejected unsafe ${section} note slug: ${slug}`);
+    return null;
+  }
+
+  const { fullPath, markdownFileDir, normalizedSlug } = resolvedPath;
+
   try {
     if (!fs.existsSync(fullPath)) {
       console.warn(`Note file not found: ${fullPath}`);
@@ -716,12 +799,11 @@ export async function getPostData(section: ContentSection, slug: string): Promis
     }
     const fileContents = fs.readFileSync(fullPath, 'utf8');
     const matterResult = parseFrontmatter(fileContents);
-    const frontmatter = normalizeFrontmatter(matterResult.data, matterResult.content, slug);
-    const markdownFileDir = path.dirname(slug) === '.' ? '' : path.dirname(slug);
+    const frontmatter = normalizeFrontmatter(matterResult.data, matterResult.content, normalizedSlug);
     const { contentHtml, toc } = await markdownToHtml(matterResult.content, markdownFileDir, section);
 
     return {
-      slug,
+      slug: normalizedSlug,
       frontmatter,
       contentHtml,
       markdownBody: matterResult.content,

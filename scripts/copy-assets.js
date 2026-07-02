@@ -6,12 +6,12 @@ const sourceContentDir = path.join(process.cwd(), 'content');
 // 目标目录：Next.js public 目录下的子文件夹，用于存放复制过来的附件
 const targetAssetsDir = path.join(process.cwd(), 'public', 'content');
 
-// 允许复制到 public 的静态附件类型。避免把 HTML/JS/服务端脚本等可执行或源码文件发布出去。
+// 允许复制到 public 的静态附件类型。避免把 HTML/JS/SVG/服务端脚本等可执行或源码文件发布出去。
 const allowedExtensions = new Set([
   ".ai", ".avi", ".bmp", ".csv", ".doc", ".docx", ".epub", ".flac",
   ".gif", ".gz", ".jpeg", ".jpg", ".json", ".mkv", ".mobi", ".mov",
   ".mp3", ".mp4", ".odp", ".ods", ".odt", ".ogg", ".pdf", ".png",
-  ".ppt", ".pptx", ".psd", ".rar", ".rtf", ".svg", ".tar", ".txt",
+  ".ppt", ".pptx", ".psd", ".rar", ".rtf", ".tar", ".txt",
   ".wav", ".webp", ".wmv", ".xls", ".xlsx", ".xml", ".zip", ".7z", ".3gp",
 ]);
 
